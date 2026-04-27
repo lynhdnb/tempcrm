@@ -1,0 +1,340 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Клиент — {{ client.last_name }} {{ client.first_name }}{% endblock %}
+
+{% block page_title %}Клиент: {{ client.last_name }} {{ client.first_name }}{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" type="text/css" href="{% static 'css/client_detail.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="container">
+
+  <!-- Левая панель -->
+  <div class="panel">
+    <a href="{% url 'client_edit' client.id %}?next={{ request.get_full_path|urlencode }}"
+       class="client-name" style="text-decoration: none; color: inherit;">
+      {{ client.last_name }} {{ client.first_name }}
+    </a>
+
+    <span class="client-status 
+        {% if client.status == 'new' %}status-new
+        {% elif client.status == 'active' %}status-active
+        {% elif client.status == 'inactive' %}status-inactive
+        {% endif %}"
+        title="Статус клиента">
+      {{ client.get_status_display }}
+    </span>
+
+    <div class="section">
+      <div class="section-title">Контакты</div>
+      <div class="contact-row">
+        <span class="contact-label">Телефон:</span>
+        <span class="contact-value">{{ client.phone }}</span>
+        <a href="{% url 'client_edit' client.id %}?next={{ request.get_full_path|urlencode }}"
+           class="edit-btn" title="Редактировать телефон">✏️</a>
+      </div>
+      {% if client.email %}
+      <div class="contact-row">
+        <span class="contact-label">Email:</span>
+        <span class="contact-value">{{ client.email }}</span>
+        <a href="{% url 'client_edit' client.id %}?next={{ request.get_full_path|urlencode }}"
+           class="edit-btn" title="Редактировать email">✏️</a>
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="section">
+      <div class="section-title">Активные курсы</div>
+      {% if enrollments %}
+        {% for enrollment in enrollments %}
+          <div class="course-item">
+            <div class="course-name">{{ enrollment.product.name }}</div>
+            <div class="course-detail">Статус: {{ enrollment.get_status_display }}</div>
+            {% if enrollment.total_lessons or enrollment.total_practice %}
+              <div class="course-detail">
+                Занятия: {{ enrollment.used_lessons|default:"0" }}/{{ enrollment.total_lessons|default:"—" }}
+                {% if enrollment.total_practice %}
+                  | Практики: {{ enrollment.used_practice|default:"0" }}/{{ enrollment.total_practice }}
+                {% endif %}
+              </div>
+            {% endif %}
+            {% if enrollment.next_payment_date %}
+              <div class="course-detail">Следующий платёж: {{ enrollment.next_payment_date|date:"d M Y" }}</div>
+            {% endif %}
+          </div>
+        {% endfor %}
+      {% else %}
+        <div class="course-item">
+          <div class="course-name">— нет активных курсов —</div>
+        </div>
+      {% endif %}
+    </div>
+    
+    <div class="section">
+      <div class="section-title">История посещений</div>
+      
+      {% if lessons_preview %}
+        {% for lesson in lessons_preview %}
+          <div class="course-item" style="margin-bottom: 10px; padding: 10px; background: #f8f9fa; border-radius: 6px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <div>
+                <strong>{{ lesson.start_time|date:"d.m.Y H:i" }}</strong>
+                {% if lesson.start_time >= now %}
+                  <span class="badge bg-warning" style="font-size: 10px;"> Будущее</span>
+                {% else %}
+                  <span class="badge bg-success" style="font-size: 10px;">✅ Прошлое</span>
+                {% endif %}
+              </div>
+              <a href="{% url 'lesson_detail' lesson.pk %}" class="text-muted" style="font-size: 12px;">
+                Подробнее →
+              </a>
+            </div>
+            <div class="course-detail" style="font-size: 13px;">
+              {% if lesson.teacher %}
+                👤 {{ lesson.teacher.user.last_name }} {{ lesson.teacher.user.first_name }}
+              {% else %}
+                🎧 Самостоятельная практика
+              {% endif %}
+              · 🚪 {{ lesson.room.name }}
+            </div>
+          </div>
+        {% endfor %}
+      {% else %}
+        <div class="course-item">
+          <div class="course-name">— нет занятий —</div>
+        </div>
+      {% endif %}
+      
+      <div style="margin-top: 12px; text-align: center;">
+        <a href="{% url 'lesson_list' %}?client={{ client.id }}" class="btn btn-outline-primary btn-sm w-100">
+          📋 Показать всю историю занятий
+        </a>
+      </div>
+    </div>
+    
+    <div class="section">
+      <div class="section-title">Платежи</div>
+      {% if payments %}
+        {% for payment in payments %}
+          <div class="payment-item">
+            <div>
+              Платёж №{{ payment.installment_number }} — 
+              {{ payment.amount_paid_by_client }} ₽
+              {% if payment.enrollment.product %}
+                за «{{ payment.enrollment.product.name }}»
+              {% endif %}
+            </div>
+            <div class="payment-status {% if payment.is_paid %}paid{% else %}unpaid{% endif %}">
+              {% if payment.is_paid %}
+                ✅ Оплачен
+              {% else %}
+                ❌ Не оплачен
+              {% endif %}
+            </div>
+          </div>
+        {% endfor %}
+      {% else %}
+        <div class="payment-item">
+          <div>— нет платежей —</div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Центр: лог -->
+  <div class="panel" style="display: flex; flex-direction: column; height: 100%;">
+    <div class="log-header">История взаимодействий</div>
+    
+    <!-- Скроллируемая лента -->
+    <div class="log-entries" style="flex: 1; overflow-y: auto;">
+      {% for interaction in interactions %}
+        <div class="log-entry">
+          <div class="log-meta">
+            <span>
+              <span class="log-sender">
+                {{ interaction.created_by.first_name|default:interaction.created_by.username|default:"Система" }}
+              </span>
+              · {{ interaction.created_at|date:"d M Y, H:i" }}
+            </span>
+            <span class="log-type-badge">{{ interaction.get_interaction_type_display }}</span>
+          </div>
+          <div class="log-content">
+            {% if interaction.interaction_type == 'task' %}
+              <!-- задача -->
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
+                {% if interaction.is_completed %}
+                  <div style="opacity: 0.7;">
+                    🔔 <strong>Напоминание:</strong> <s>{{ interaction.content|linebreaks }}</s>
+                  </div>
+                {% else %}
+                  <div>
+                    🔔 <strong>Напоминание:</strong> {{ interaction.content|linebreaks }}
+                  </div>
+                  <div style="display: flex; gap: 6px; flex-shrink: 0;">
+                    <a href="{% url 'edit_task' interaction.id %}" 
+                       class="text-muted" 
+                       title="Редактировать задачу"
+                       style="font-size: 16px; text-decoration: none;">
+                      ✏️
+                    </a>
+                    <form method="post" action="{% url 'mark_task_completed' interaction.id %}" style="display:inline;">
+                      {% csrf_token %}
+                      <button type="submit" class="btn-completed" title="Отметить как выполненную">✅ Выполнено</button>
+                    </form>
+                  </div>
+                {% endif %}
+              </div>
+              <small class="text-muted">
+                Дедлайн: {{ interaction.deadline|date:"d M Y, H:i" }}
+                {% if interaction.assigned_to %}
+                  · Назначена: {{ interaction.assigned_to.first_name|default:interaction.assigned_to.username }}
+                {% endif %}
+                {% if interaction.is_completed %}
+                  · <strong style="color: #27ae60;">✅ Выполнено</strong>
+                {% endif %}
+              </small>
+
+            {% elif interaction.interaction_type == 'note' %}
+              {% if interaction.is_edited %}
+                <!-- Отредактированный комментарий -->
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
+                  <div>{{ interaction.content|linebreaks }}</div>
+                  {% if interaction.created_by == user %}
+                    <a href="{% url 'edit_note' interaction.id %}" 
+                       class="text-muted" 
+                       title="Редактировать комментарий"
+                       style="font-size: 16px; text-decoration: none; margin-left: 12px; flex-shrink: 0;">
+                      ✏️
+                    </a>
+                  {% endif %}
+                </div>
+                <div style="display: flex; justify-content: flex-end; margin-top: 4px; font-size: 12px;">
+                  <span class="toggle-history" 
+                        style="cursor: pointer; color: #3498db;" 
+                        data-interaction-id="{{ interaction.id }}">(ред.) 👁️</span>
+                </div>
+                <div id="history-{{ interaction.id }}" class="history-block" style="display: none; margin-top: 8px; padding: 10px; background: #f8f9fa; border-left: 2px solid #ccc; font-size: 13px;">
+                  <div><strong>История изменений:</strong></div>
+                  {% for edit in interaction.edits.all %}
+                    <div style="margin-top: 6px;">
+                      <div>{{ edit.new_content|linebreaks }}</div>
+                      <small class="text-muted">
+                        {{ edit.edited_at|date:"d M Y, H:i" }} — 
+                        {{ edit.edited_by.first_name|default:edit.edited_by.username }}
+                      </small>
+                    </div>
+                  {% endfor %}
+                </div>
+              {% else %}
+                <!-- Обычный комментарий -->
+                {% if interaction.created_by == user %}
+                  <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
+                    <div>{{ interaction.content|linebreaks }}</div>
+                    <a href="{% url 'edit_note' interaction.id %}" 
+                       class="text-muted" 
+                       title="Редактировать комментарий"
+                       style="font-size: 16px; text-decoration: none; margin-left: 12px; flex-shrink: 0;">
+                      ✏️
+                    </a>
+                  </div>
+                {% else %}
+                  {{ interaction.content|linebreaks }}
+                {% endif %}
+              {% endif %}
+
+            {% else %}
+              {{ interaction.content|linebreaks }}
+            {% endif %}
+          </div>
+        </div>
+      {% empty %}
+        <p class="text-muted">Нет записей.</p>
+      {% endfor %}
+    </div>
+
+    <!-- Форма — всегда видна, не скроллится -->
+    <div style="margin-top: 16px; padding-top: 16px; border-top: 1px dashed #eee;">
+      <form method="post" action="{% url 'add_note' client.id %}">
+        {% csrf_token %}
+        <div class="log-input-grid">
+          <textarea name="content" placeholder="Напишите комментарий..."></textarea>
+          <a href="{% url 'add_task' client.id %}" class="btn btn-outline-secondary btn-sm">➕ Новая задача</a>
+          <button type="submit" class="btn btn-success btn-sm">Добавить</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Правая панель -->
+  <div class="panel">
+    <div class="section">
+      <div class="section-title">Быстрые действия</div>
+      <div class="quick-actions">
+        <button class="quick-btn" onclick="window.location.href='tel:{{ client.phone }}'">📞 Позвонить</button>
+        <button class="quick-btn" disabled>🎟️ Записать</button>
+        <button class="quick-btn" disabled>💰 Продажа</button>
+        <button class="quick-btn" disabled>✉️ Написать</button>
+        <button class="quick-btn" disabled>➕ Задача</button>
+        <button class="quick-btn" disabled>✅ Оплата</button>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Задачи</div>
+      <div class="tasks-group">
+        {% if active_tasks %}
+          {% for task in active_tasks %}
+            <div class="task-item">
+              <div class="task-title">{{ task.content|truncatechars:50 }}</div>
+              <div class="task-meta">
+                📅 {{ task.deadline|date:"d.m.Y H:i" }}
+                {% if task.assigned_to %}
+                  · 👤 {{ task.assigned_to.first_name|default:task.assigned_to.username }}
+                {% endif %}
+              </div>
+              <div style="margin-top: 6px; display: flex; gap: 6px;">
+                <a href="{% url 'edit_task' task.id %}" 
+                   class="text-muted" 
+                   title="Редактировать задачу"
+                   style="font-size: 14px; text-decoration: none;">
+                  ✏️
+                </a>
+                <form method="post" action="{% url 'mark_task_completed' task.id %}" style="display:inline;">
+                  {% csrf_token %}
+                  <button type="submit" class="btn-completed" title="Отметить как выполненную" style="font-size: 11px; padding: 2px 6px;">✅</button>
+                </form>
+              </div>
+            </div>
+          {% endfor %}
+        {% else %}
+          <div class="task-item">
+            <div class="task-title">— нет активных задач —</div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  document.querySelectorAll('.toggle-history').forEach(icon => {
+    icon.addEventListener('click', function() {
+      const interactionId = this.getAttribute('data-interaction-id');
+      const block = document.getElementById('history-' + interactionId);
+      if (block.style.display === 'none') {
+        block.style.display = 'block';
+        this.textContent = '(ред.) 👁️↑';
+      } else {
+        block.style.display = 'none';
+        this.textContent = '(ред.) 👁️';
+      }
+    });
+  });
+</script>
+
+{% endblock %}

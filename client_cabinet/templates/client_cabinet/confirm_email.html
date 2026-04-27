@@ -1,0 +1,31 @@
+{% extends 'client_cabinet/base.html' %}
+
+{% block title %}Подтверждение email — MUSERP{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 500px; margin: 40px auto; text-align: center;">
+    <h2 class="card-title">📧 Подтверждение email</h2>
+    
+    {% if success %}
+        <div class="alert alert-success" style="margin-top: 24px;">
+            ✅ Ваш email успешно подтверждён!
+        </div>
+        <p style="color: var(--gray-600); margin: 24px 0;">
+            Теперь вы можете войти в личный кабинет.
+        </p>
+        <a href="/admin/login/" class="btn btn-primary">
+            🔐 Войти
+        </a>
+    {% else %}
+        <div class="alert alert-danger" style="margin-top: 24px;">
+            ❌ Ссылка недействительна или истекла
+        </div>
+        <p style="color: var(--gray-600); margin: 24px 0;">
+            Пожалуйста, запросите новую ссылку для подтверждения.
+        </p>
+        <a href="{% url 'client_cabinet:register' %}" class="btn btn-primary">
+            🔄 Повторить регистрацию
+        </a>
+    {% endif %}
+</div>
+{% endblock %}

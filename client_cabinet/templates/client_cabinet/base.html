@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>{% block title %}Личный кабинет — MUSERP{% endblock %}</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/client_cabinet.css' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Шапка с лого школы -->
+    <header class="top-header">
+        <div class="header-container">
+            <div class="header-content">
+                <a href="{% url 'client_cabinet:dashboard' %}" class="school-logo">
+                    <span class="logo-icon">🎵</span>
+                    <span class="logo-text">Импульс</span>
+                </a>
+                <a href="{% url 'client_cabinet:profile_edit' %}" class="user-login">
+                    <span class="user-icon">👤</span>
+                    <span class="user-name">{{ user.username }}</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Основной контент -->
+    <div class="main-content">
+        <div class="container">
+            <!-- Уведомления -->
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags|default:'info' }}">
+                        {% if message.tags == 'success' %}✅{% elif message.tags == 'error' or message.tags == 'danger' %}❌{% elif message.tags == 'warning' %}⚠️{% endif %}
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <!-- Контент страницы -->
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+
+    <!-- Нижняя навигация (как в мобильных приложениях) -->
+    <nav class="bottom-nav">
+        <a href="{% url 'client_cabinet:dashboard' %}" 
+           class="nav-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+            <span class="nav-icon">🏠</span>
+            <span class="nav-label">Главная</span>
+        </a>
+        <a href="{% url 'client_cabinet:schedule' %}" 
+           class="nav-item {% if request.resolver_match.url_name == 'schedule' %}active{% endif %}">
+            <span class="nav-icon">📅</span>
+            <span class="nav-label">Расписание</span>
+        </a>
+        <a href="{% url 'client_cabinet:courses' %}" 
+           class="nav-item {% if request.resolver_match.url_name == 'courses' %}active{% endif %}">
+            <span class="nav-icon">📚</span>
+            <span class="nav-label">Курсы</span>
+        </a>
+        <a href="{% url 'client_cabinet:installments' %}" 
+           class="nav-item {% if request.resolver_match.url_name == 'installments' %}active{% endif %}">
+            <span class="nav-icon">💰</span>
+            <span class="nav-label">Рассрочка</span>
+        </a>
+        <a href="{% url 'client_cabinet:profile_edit' %}" 
+           class="nav-item {% if request.resolver_match.url_name == 'profile_edit' %}active{% endif %}">
+            <span class="nav-icon">⚙️</span>
+            <span class="nav-label">Настройки</span>
+        </a>
+    </nav>
+
+    {% block extra_js %}{% endblock %}
+<!-- Переключатель темы -->
+<script>
+(function() {
+    const savedTheme = localStorage.getItem('theme');
+    const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    
+    // Устанавливаем атрибут при загрузке любой страницы
+    if (savedTheme === 'dark') {
+        document.body.setAttribute('data-theme', 'dark');
+    } else if (savedTheme === 'light') {
+        document.body.setAttribute('data-theme', 'light');
+    } else if (systemDark) {
+        document.body.setAttribute('data-theme', 'dark');
+    } else {
+        document.body.setAttribute('data-theme', 'light');
+    }
+})();
+</script>
+</body>
+</html>

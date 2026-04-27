@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block title %}Профиль — ERP{% endblock %}
+{% block page_title %}Мой профиль{% endblock %}
+
+{% block content %}
+{% if messages %}
+  {% for message in messages %}
+    <div class="alert alert-success">{{ message }}</div>
+  {% endfor %}
+{% endif %}
+<div class="row">
+  <div class="col-md-6">
+    <div class="card mb-4">
+      <div class="card-body">
+        <h5 class="card-title">Основная информация</h5>
+        <p><strong>Имя:</strong> {{ user.first_name|default:"—" }}</p>
+        <p><strong>Фамилия:</strong> {{ user.last_name|default:"—" }}</p>
+        <p><strong>Email:</strong> {{ user.email|default:"—" }}</p>
+        <p><strong>Роль:</strong> {{ profile.get_role_display }}</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Контактный телефон</h5>
+        <form method="post">
+          {% csrf_token %}
+          <div class="mb-3">
+            {{ form.phone.label_tag }}
+            {{ form.phone }}
+            {% if form.phone.errors %}
+              <div class="text-danger">{{ form.phone.errors }}</div>
+            {% endif %}
+          </div>
+          <button type="submit" class="btn btn-primary">Сохранить телефон</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

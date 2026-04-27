@@ -1,0 +1,201 @@
+from django.shortcuts import render, redirect
+from django.contrib.auth import login, authenticate
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
+from django.core.mail import send_mail
+from django.core.signing import Signer
+from django.contrib import messages
+from clients.models import Client
+from products.models import Enrollment, Payment
+from lessons.models import Lesson
+from .models import ClientCabinetProfile
+from .models import ClientCabinetProfile
+
+
+def register(request):
+    """Страница регистрации"""
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        phone = request.POST.get('phone', '')
+        
+        # Очистим телефон от лишних символов для поиска
+        phone_clean = phone.replace(' ', '').replace('-', '').replace('(', '').replace(')', '')
+        
+        # 1. Ищем клиента в CRM по телефону
+        try:
+            client = Client.objects.get(phone=phone_clean)
+        except Client.DoesNotExist:
+            messages.error(request, 'Клиент с таким телефоном не найден в базе')
+            return render(request, 'client_cabinet/register.html')
+        
+        # 2. Проверяем наличие активного Enrollment
+        enrollment = Enrollment.objects.filter(client=client, status='active').first()
+        if not enrollment:
+            messages.error(request, 'У вас нет активных занятий. Обратитесь к администратору')
+            return render(request, 'client_cabinet/register.html')
+        
+        # 3. Проверяем, не зарегистрирован ли уже этот клиент
+        if User.objects.filter(email=email).exists():
+            messages.error(request, 'Этот email уже зарегистрирован')
+            return render(request, 'client_cabinet/register.html')
+        
+        # 4. Создаём пользователя
+        user = User.objects.create_user(username=username, email=email, password=password)
+        
+        # 5. Создаём профиль кабинета и связываем с Client
+        profile = ClientCabinetProfile.objects.create(user=user, phone=phone_clean)
+        profile.client = client  # Связь с CRM
+        profile.save()
+        
+        # 6. Генерируем токен подтверждения
+        signer = Signer()
+        token = signer.sign(f'{user.id}:{user.email}')
+        
+        # 7. Отправляем письмо
+        send_mail(
+            'Подтверждение email — MUSERP',
+            f'Перейдите по ссылке: http://muserp.na4u.ru/cabinet/confirm-email/{token}/',
+            'noreply@muserp.na4u.ru',
+            [email],
+            fail_silently=False,
+        )
+        
+        messages.success(request, 'Регистрация успешна! Проверьте почту')
+        return redirect('client_cabinet:confirm_email')
+    
+    return render(request, 'client_cabinet/register.html')
+
+
+@login_required
+def confirm_email(request):
+    """Страница подтверждения email"""
+    return render(request, 'client_cabinet/confirm_email.html')
+
+
+@login_required
+def dashboard(request):
+    """Главная страница личного кабинета"""
+    return render(request, 'client_cabinet/dashboard.html')
+
+
+@login_required
+def schedule(request):
+    """Расписание занятий клиента"""
+    profile = request.user.clientcabinetprofile
+    client = profile.client
+    lessons = Lesson.objects.filter(client=client).order_by('start_time')
+    
+    context = {
+        'lessons': lessons,
+    }
+    
+    return render(request, 'client_cabinet/schedule.html', context)
+
+
+@login_required
+def purchases(request):
+    """Мои покупки — абонементы и занятия"""
+    profile = request.user.clientcabinetprofile
+    client = profile.client
+    enrollments = Enrollment.objects.filter(client=client).order_by('-created_at')
+    
+    context = {
+        'enrollments': enrollments,
+    }
+    
+    return render(request, 'client_cabinet/purchases.html', context)
+
+
+@login_required
+def payments(request):
+    """Баланс и оплаты — история платежей и задолженность"""
+    profile = request.user.clientcabinetprofile
+    client = profile.client
+    
+    payments_list = Payment.objects.filter(
+        enrollment__client=client
+    ).select_related('enrollment__product').order_by('installment_number')
+    
+    total_paid = sum(float(p.amount_paid_by_client) for p in payments_list if p.is_paid)
+    total_due = sum(float(p.amount_paid_by_client) for p in payments_list if not p.is_paid)
+    total_amount = total_paid + total_due
+    
+    next_payment = payments_list.filter(is_paid=False).order_by('due_date').first()
+    
+    context = {
+        'payments': payments_list,
+        'total_paid': total_paid,
+        'total_due': total_due,
+        'total_amount': total_amount,
+        'next_payment': next_payment,
+    }
+    
+    return render(request, 'client_cabinet/payments.html', context)
+
+
+@login_required
+def profile_edit(request):
+    """Редактирование профиля — телефон"""
+    profile = request.user.clientcabinetprofile
+    
+    if request.method == 'POST':
+        form = ProfileForm(request.POST, instance=profile)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Профиль успешно обновлён.')
+            return redirect('client_cabinet:profile_edit')
+    else:
+        form = ProfileForm(instance=profile)
+    
+    context = {
+        'form': form,
+        'email': request.user.email,
+    }
+    
+    return render(request, 'client_cabinet/profile_edit.html', context)
+
+
+@login_required
+def password_change(request):
+    """Смена пароля"""
+    if request.method == 'POST':
+        form = PasswordChangeForm(request.POST)
+        if form.is_valid():
+            old_password = form.cleaned_data['old_password']
+            new_password = form.cleaned_data['new_password1']
+            
+            # Проверяем текущий пароль
+            if not request.user.check_password(old_password):
+                form.add_error('old_password', 'Неверный текущий пароль.')
+            else:
+                # Устанавливаем новый пароль
+                request.user.set_password(new_password)
+                request.user.save()
+                messages.success(request, 'Пароль успешно изменён.')
+                return redirect('client_cabinet:dashboard')
+    else:
+        form = PasswordChangeForm()
+    
+    context = {
+        'form': form,
+    }
+    
+    return render(request, 'client_cabinet/password_change.html', context)
+    
+
+def confirm_email_token(request, token):
+    """Подтверждение email по ссылке из письма"""
+    signer = Signer()
+    try:
+        data = signer.unsign(token, max_age=86400)
+        user_id, email = data.split(':')
+        user = User.objects.get(id=user_id)
+        profile = ClientCabinetProfile.objects.get(user=user)
+        profile.email_confirmed = True
+        profile.save()
+        login(request, user)
+        return redirect('client_cabinet:dashboard')
+    except Exception:
+        return redirect('client_cabinet:confirm_email')

@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход — MUSERP</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4f46e5;
+            --primary-hover: #4338ca;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-900: #111827;
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --radius-lg: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            background: white;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            width: 100%;
+            max-width: 420px;
+            padding: 40px;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .logo-icon {
+            font-size: 3rem;
+            margin-bottom: 12px;
+        }
+
+        .logo-text {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 800;
+            font-size: 2rem;
+            color: var(--primary-color);
+            letter-spacing: -0.5px;
+        }
+
+        .logo-subtitle {
+            color: var(--gray-600);
+            font-size: 0.9rem;
+            margin-top: 8px;
+        }
+
+        .form-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        .alert-danger {
+            background: #fee2e2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--gray-700);
+            font-size: 0.9rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--gray-300);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 14px 20px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 24px;
+            color: var(--gray-600);
+            font-size: 0.85rem;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            body {
+                background: linear-gradient(135deg, #1a1b26 0%, #24283b 100%);
+            }
+
+            .login-container {
+                background: #1f2335;
+            }
+
+            .form-title {
+                color: #c0caf5;
+            }
+
+            .form-label {
+                color: #a9b1d6;
+            }
+
+            .form-control {
+                background: #24283b;
+                border-color: #414868;
+                color: #c0caf5;
+            }
+
+            .form-control:focus {
+                border-color: #7aa2f7;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo">
+            <div class="logo-icon">🎵</div>
+            <div class="logo-text">Импульс</div>
+            <div class="logo-subtitle">Музыкальная школа</div>
+        </div>
+
+        <h1 class="form-title">Вход в систему</h1>
+
+        {% if form.errors %}
+            <div class="alert-danger">
+                ❌ Неверный логин или пароль. Попробуйте ещё раз.
+            </div>
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label class="form-label" for="id_username">Логин или Email:</label>
+                <input type="text" name="username" id="id_username" class="form-control" required autofocus placeholder="Введите логин">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="id_password">Пароль:</label>
+                <input type="password" name="password" id="id_password" class="form-control" required placeholder="Введите пароль">
+            </div>
+
+            <button type="submit" class="btn-primary">🔐 Войти</button>
+        </form>
+        
+        <!-- Ссылка на регистрацию -->
+        <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
+            <p style="color: var(--text-secondary); margin-bottom: 15px;">
+                Ещё нет аккаунта?
+            </p>
+            <a href="/cabinet/register/" class="btn-primary" style="text-decoration: none; display: inline-block;">
+                📝 Зарегистрироваться
+            </a>
+        </div>
+
+        <div class="footer">
+            © 2025 MUSERP. Все права защищены.
+        </div>
+    </div>
+</body>
+</html>

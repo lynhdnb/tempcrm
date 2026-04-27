@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block title %}Отмена занятия — ERP{% endblock %}
+{% block page_title %}Отмена занятия{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6">
+    <div class="card border-danger">
+      <div class="card-header bg-danger text-white">
+        <h5 class="mb-0">⚠️ Подтверждение отмены</h5>
+      </div>
+      <div class="card-body">
+        <p>Вы собираетесь отменить занятие:</p>
+        <ul class="list-unstyled">
+          <li><strong>Клиент:</strong> {{ lesson.client.last_name }} {{ lesson.client.first_name }}</li>
+          <li><strong>Дата:</strong> {{ lesson.start_time|date:"d.m.Y H:i" }}</li>
+          <li><strong>Кабинет:</strong> {{ lesson.room.name }}</li>
+          <li><strong>Тип:</strong> 
+            {% if lesson.lesson_type == 'lesson' %}
+              📚 Занятие с преподавателем
+            {% else %}
+              🎧 Самостоятельная практика
+            {% endif %}
+          </li>
+        </ul>
+        
+        <form method="post">
+          {% csrf_token %}
+          
+          <div class="mb-3">
+            <label class="form-label fw-bold">Тип отмены <span class="text-danger">*</span></label>
+            <div class="form-check mb-2">
+              <input class="form-check-input" type="radio" name="cancel_type" id="no_show" value="no_show" required>
+              <label class="form-check-label" for="no_show">
+                <strong>❌  Со списанием</strong>
+                <small class="text-muted d-block">Клиент не пришёл или предупредил в день занятия</small>
+              </label>
+            </div>
+            <div class="form-check mb-2">
+              <input class="form-check-input" type="radio" name="cancel_type" id="cancelled_early" value="cancelled_early">
+              <label class="form-check-label" for="cancelled_early">
+                <strong>⚠️ Без списания</strong>
+                <small class="text-muted d-block">Клиент предупредил за день до занятия</small>
+              </label>
+            </div>
+          </div>
+          
+          <div class="mb-3">
+            <label for="delete_comment" class="form-label fw-bold">Причина отмены <span class="text-danger">*</span></label>
+            <textarea name="delete_comment" id="delete_comment" class="form-control" rows="3" required placeholder="Обязательно укажите причину отмены занятия"></textarea>
+            <small class="text-muted">Этот комментарий будет сохранён в истории занятия</small>
+          </div>
+          
+          <button type="submit" class="btn btn-danger">Подтвердить отмену</button>
+          <a href="{% url 'lesson_detail' lesson.pk %}" class="btn btn-secondary">Отмена</a>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

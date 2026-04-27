@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block title %}Доступ запрещён — ERP{% endblock %}
+{% block page_title %}Доступ запрещён{% endblock %}
+
+{% block content %}
+<div class="alert alert-danger">
+  <h4>У вас нет прав для просмотра этой страницы.</h4>
+  <p>Обратитесь к администратору системы.</p>
+  <a href="/" class="btn btn-primary">Вернуться на главную</a>
+</div>
+{% endblock %}

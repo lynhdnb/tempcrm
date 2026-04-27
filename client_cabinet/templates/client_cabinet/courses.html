@@ -1,0 +1,102 @@
+{% extends 'client_cabinet/base.html' %}
+
+{% block title %}Мои курсы — MUSERP{% endblock %}
+
+{% block content %}
+<!-- Заголовок -->
+<div class="page-header">
+    <h1 class="page-title">📚 Мои курсы</h1>
+    <p class="page-subtitle">Ваши абонементы и прогресс обучения</p>
+</div>
+
+{% if enrollments %}
+    {% for item in enrollments %}
+    {% with enrollment=item.enrollment progress_percent=item.progress_percent next_lesson=item.next_lesson %}
+    <div class="card">
+        <!-- Заголовок карточки -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2 class="card-title" style="margin: 0; border: none; padding: 0;">
+                {{ enrollment.product.name }}
+            </h2>
+            {% if enrollment.status == 'active' %}
+                <span class="status-badge success">✅ Активен</span>
+            {% elif enrollment.status == 'completed' %}
+                <span class="status-badge warning">⏳ Завершён</span>
+            {% else %}
+                <span class="status-badge danger">❌ Неактивен</span>
+            {% endif %}
+        </div>
+        
+        <!-- Прогресс занятий -->
+        {% if enrollment.lessons_total and enrollment.lessons_total > 0 %}
+        <div style="margin-bottom: 24px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                <span style="font-weight: 500;">Прогресс занятий</span>
+                <span style="font-weight: 700; color: var(--primary-color);">{{ progress_percent }}%</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: {{ progress_percent }}%"></div>
+            </div>
+            <p style="font-size: 0.9rem; color: var(--gray-600); margin-top: 8px;">
+                Использовано: {{ enrollment.lessons_used }} из {{ enrollment.lessons_total }} занятий
+            </p>
+        </div>
+        {% endif %}
+        
+        <!-- Статистика -->
+        <div class="stats-grid" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 24px;">
+            <div class="stat-card" style="padding: 12px;">
+                <div class="stat-value green" style="font-size: 1.5rem;">{{ item.lessons_completed }}</div>
+                <div class="stat-label" style="font-size: 0.8rem;">Проведено</div>
+            </div>
+            <div class="stat-card" style="padding: 12px;">
+                <div class="stat-value yellow" style="font-size: 1.5rem;">{{ item.lessons_scheduled }}</div>
+                <div class="stat-label" style="font-size: 0.8rem;">Запланировано</div>
+            </div>
+            <div class="stat-card" style="padding: 12px;">
+                <div class="stat-value blue" style="font-size: 1.5rem;">{{ enrollment.lessons_total|default:"—" }}</div>
+                <div class="stat-label" style="font-size: 0.8rem;">Всего в курсе</div>
+            </div>
+        </div>
+        
+        <!-- Следующее занятие -->
+        {% if next_lesson %}
+        <div style="background: var(--gray-50); padding: 16px; border-radius: var(--radius); margin-bottom: 16px;">
+            <p style="font-weight: 600; margin-bottom: 8px;">🔜 Следующее занятие:</p>
+            <div style="display: grid; gap: 8px; font-size: 0.95rem;">
+                <div><strong>Дата:</strong> {{ next_lesson.start_time|date:"d.m.Y" }}</div>
+                <div><strong>Время:</strong> {{ next_lesson.start_time|time:"H:i" }} - {{ next_lesson.end_time|time:"H:i" }}</div>
+                <div><strong>Преподаватель:</strong> {{ next_lesson.teacher }}</div>
+                <div><strong>Кабинет:</strong> {{ next_lesson.room.name }}</div>
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Практики -->
+        {% if enrollment.total_practice %}
+        <div style="border-top: 1px solid var(--gray-200); padding-top: 16px;">
+            <p style="font-weight: 500; margin-bottom: 8px;">🎸 Практики:</p>
+            <p style="color: var(--gray-600);">
+                Использовано: {{ enrollment.practices_used }} из {{ enrollment.total_practice }}
+            </p>
+        </div>
+        {% endif %}
+        
+        <!-- Дата начала -->
+        <div style="border-top: 1px solid var(--gray-200); padding-top: 16px; margin-top: 16px;">
+            <p style="font-size: 0.875rem; color: var(--gray-600);">
+                📅 Начат: {{ enrollment.created_at|date:"d.m.Y" }}
+            </p>
+        </div>
+    </div>
+    {% endwith %}
+    {% endfor %}
+{% else %}
+    <div class="card">
+        <p style="color: var(--gray-600); text-align: center; padding: 40px;">
+            У вас пока нет активных курсов.<br>
+            <a href="/" class="btn btn-primary" style="margin-top: 16px;">🛍️ Перейти в каталог</a>
+        </p>
+    </div>
+{% endif %}
+{% endblock %}

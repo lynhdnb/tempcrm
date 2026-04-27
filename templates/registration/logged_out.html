@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Выход — MUSERP</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4f46e5;
+            --primary-hover: #4338ca;
+            --success-color: #10b981;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-900: #111827;
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --radius-lg: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .logout-container {
+            background: white;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            width: 100%;
+            max-width: 420px;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .logo-icon {
+            font-size: 4rem;
+            margin-bottom: 16px;
+        }
+
+        .logout-title {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            font-size: 1.75rem;
+            color: var(--gray-900);
+            margin-bottom: 12px;
+        }
+
+        .logout-message {
+            color: var(--gray-600);
+            font-size: 1rem;
+            margin-bottom: 32px;
+            line-height: 1.6;
+        }
+
+        .btn-primary {
+            display: inline-block;
+            width: 100%;
+            padding: 14px 20px;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: background 0.2s ease;
+            margin-bottom: 12px;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+        }
+
+        .btn-secondary {
+            display: inline-block;
+            width: 100%;
+            padding: 14px 20px;
+            background: var(--gray-100);
+            color: var(--gray-700);
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: background 0.2s ease;
+        }
+
+        .btn-secondary:hover {
+            background: var(--gray-200);
+        }
+
+        .footer {
+            margin-top: 24px;
+            color: var(--gray-600);
+            font-size: 0.85rem;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            body {
+                background: linear-gradient(135deg, #1a1b26 0%, #24283b 100%);
+            }
+
+            .logout-container {
+                background: #1f2335;
+            }
+
+            .logout-title {
+                color: #c0caf5;
+            }
+
+            .logout-message {
+                color: #a9b1d6;
+            }
+
+            .btn-secondary {
+                background: #24283b;
+                color: #c0caf5;
+            }
+
+            .btn-secondary:hover {
+                background: #2f3549;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="logout-container">
+        <div class="logo-icon">👋</div>
+        
+        <h1 class="logout-title">До свидания!</h1>
+        
+        <p class="logout-message">
+            Вы успешно вышли из системы.<br>
+            Спасибо, что были с нами!
+        </p>
+
+        <a href="/accounts/login/" class="btn-primary">🔐 Войти снова</a>
+        
+        <a href="/" class="btn-secondary">🏠 На главную</a>
+
+        <div class="footer">
+            © 2025 MUSERP. Все права защищены.
+        </div>
+    </div>
+</body>
+</html>

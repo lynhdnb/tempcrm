@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block title %}Дашборд менеджера{% endblock %}
+
+{% block page_title %}Дашборд менеджера — {{ user.get_full_name|default:user.username }}{% endblock %}
+
+{% block content %}
+<!-- Статистика -->
+<div class="dashboard-grid">
+  <div class="stat-card">
+    <div class="stat-label">Пробные занятия (сегодня)</div>
+    <div class="stat-value">{{ trials_today }} / {{ trial_plan }}</div>
+    <div class="progress-bar">
+      <div class="progress-fill 
+        {% if trial_percent >= 80 %}progress-good
+        {% elif trial_percent >= 50 %}progress-medium
+        {% else %}progress-poor{% endif %}"
+        style="width: {{ trial_percent }}%">
+      </div>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-label">Записи на занятия/практики (сегодня)</div>
+    <div class="stat-value">{{ enrollments_today }} / {{ enrollment_plan }}</div>
+    <div class="progress-bar">
+      <div class="progress-fill 
+        {% if enrollment_percent >= 80 %}progress-good
+        {% elif enrollment_percent >= 50 %}progress-medium
+        {% else %}progress-poor{% endif %}"
+        style="width: {{ enrollment_percent }}%">
+      </div>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-label">Продажи (сегодня)</div>
+    <div class="stat-value">{{ sales_today|floatformat:0 }} ₽<br><small>/ {{ sales_plan|floatformat:0 }} ₽</small></div>
+    <div class="progress-bar">
+      <div class="progress-fill 
+        {% if sales_percent >= 80 %}progress-good
+        {% elif sales_percent >= 50 %}progress-medium
+        {% else %}progress-poor{% endif %}"
+        style="width: {{ sales_percent }}%">
+      </div>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-label">Ожидаемые платежи</div>
+    <div class="stat-value" style="color: #e74c3c;">{{ expected_payments|floatformat:0 }} ₽</div>
+  </div>
+</div>
+
+<!-- Задачи -->
+<div class="task-section">
+  <h2>Задачи</h2>
+  <button class="btn-mark-all">✅ Отметить всё как прочитанное</button>
+
+  <div class="task-columns">
+    <div class="column red">
+      <h3>🔴 Просроченные</h3>
+      {% for task in overdue_tasks %}
+        <div class="task-card {% if not task.is_read %}unread{% endif %}">
+          <div class="task-row">
+            <div class="task-type-icon">📝</div>
+            <div class="task-content">{{ task.content }}</div>
+          </div>
+        </div>
+      {% empty %}
+        <p>Нет просроченных задач</p>
+      {% endfor %}
+    </div>
+
+    <div class="column green">
+      <h3>🟢 На сегодня</h3>
+      {% for task in today_tasks %}
+        <div class="task-card {% if not task.is_read %}unread{% endif %}">
+          <div class="task-row">
+            <div class="task-type-icon">📅</div>
+            <div class="task-content">{{ task.content }}</div>
+          </div>
+        </div>
+      {% empty %}
+        <p>Нет задач на сегодня</p>
+      {% endfor %}
+    </div>
+
+    <div class="column gray">
+      <h3>⏳ Будущие</h3>
+      {% for task in upcoming_tasks %}
+        <div class="task-card {% if not task.is_read %}unread{% endif %}">
+          <div class="task-row">
+            <div class="task-type-icon">🔜</div>
+            <div class="task-content">{{ task.content }}</div>
+          </div>
+        </div>
+      {% empty %}
+        <p>Нет будущих задач</p>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<!-- Предупреждения -->
+<div class="alerts">
+  <h3>⚠️ Требуют внимания</h3>
+  {% for alert in alerts %}
+    <div class="alert-item">{{ alert }}</div>
+  {% empty %}
+    <div class="alert-item">Нет предупреждений</div>
+  {% endfor %}
+</div>
+{% endblock %}

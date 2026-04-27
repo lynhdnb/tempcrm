@@ -1,0 +1,93 @@
+{% extends 'client_cabinet/base.html' %}
+
+{% block title %}Расписание — MUSERP{% endblock %}
+
+{% block content %}
+<!-- Заголовок -->
+<div class="page-header">
+    <h1 class="page-title">📅 Моё расписание занятий</h1>
+    <p class="page-subtitle">Предстоящие и прошедшие занятия</p>
+</div>
+
+<!-- Будущие занятия -->
+<div class="card">
+    <h2 class="card-title">⏳ Предстоящие занятия</h2>
+    
+    {% if upcoming_lessons %}
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Дата</th>
+                        <th>Время</th>
+                        <th>Преподаватель</th>
+                        <th>Кабинет</th>
+                        <th>Тип</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for lesson in upcoming_lessons %}
+                    <tr>
+                        <td>{{ lesson.start_time|date:"d.m.Y" }}</td>
+                        <td>{{ lesson.start_time|time:"H:i" }} - {{ lesson.end_time|time:"H:i" }}</td>
+                        <td>{{ lesson.teacher }}</td>
+                        <td>{{ lesson.room.name }}</td>
+                        <td>
+                            {% if lesson.lesson_type == 'practice' %}
+                                <span class="status-badge warning">🎸 Практика</span>
+                            {% else %}
+                                <span class="status-badge success">🎵 Теория</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p style="color: var(--gray-600);">Нет запланированных занятий.</p>
+    {% endif %}
+</div>
+
+<!-- Прошедшие занятия -->
+<div class="card">
+    <h2 class="card-title">✅ Прошедшие занятия</h2>
+    
+    {% if past_lessons %}
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Дата</th>
+                        <th>Время</th>
+                        <th>Преподаватель</th>
+                        <th>Кабинет</th>
+                        <th>Статус</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for lesson in past_lessons %}
+                    <tr>
+                        <td>{{ lesson.start_time|date:"d.m.Y" }}</td>
+                        <td>{{ lesson.start_time|time:"H:i" }} - {{ lesson.end_time|time:"H:i" }}</td>
+                        <td>{{ lesson.teacher }}</td>
+                        <td>{{ lesson.room.name }}</td>
+                        <td>
+                            {% if lesson.status == 'completed' %}
+                                <span class="status-badge success">✅ Проведено</span>
+                            {% elif lesson.status == 'cancelled' %}
+                                <span class="status-badge danger">❌ Отменено</span>
+                            {% else %}
+                                <span class="status-badge warning">⏳ Ожидает</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p style="color: var(--gray-600);">Нет прошедших занятий.</p>
+    {% endif %}
+</div>
+{% endblock %}

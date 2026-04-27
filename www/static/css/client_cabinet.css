@@ -1,0 +1,914 @@
+/* ========================================
+   MUSERP — Личный кабинет студента
+   Современный дизайн
+   ======================================== */
+
+
+/* ========================================
+   01. ПЕРЕМЕННЫЕ (CSS Variables)
+   ======================================== */
+:root {
+    --primary-color: #4f46e5;
+    --primary-hover: #4338ca;
+    --success-color: #10b981;
+    --warning-color: #f59e0b;
+    --danger-color: #ef4444;
+    --gray-50: #f9fafb;
+    --gray-100: #f3f4f6;
+    --gray-200: #e5e7eb;
+    --gray-300: #d1d5db;
+    --gray-600: #4b5563;
+    --gray-700: #374151;
+    --gray-900: #111827;
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --radius: 8px;
+    --radius-lg: 12px;
+}
+
+
+/* ========================================
+   02. БАЗОВЫЕ СТИЛИ (Reset, Body)
+   ======================================== */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background: var(--gray-50);
+    color: var(--gray-900);
+    line-height: 1.6;
+}
+
+
+/* ========================================
+   03. КОНТЕЙНЕР И МАКЕТ
+   ======================================== */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.main-content {
+    min-height: calc(100vh - 160px);
+    padding-bottom: 100px;
+}
+
+
+/* ========================================
+   04. ВЕРХНЯЯ ШАПКА (Logo, User Login)
+   ======================================== */
+.top-header {
+    background: white;
+    border-bottom: 1px solid var(--gray-200);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: var(--shadow-md);
+}
+
+.header-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 16px 20px;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.school-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    color: var(--primary-color);
+}
+
+.logo-icon {
+    font-size: 2rem;
+}
+
+.logo-text {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 800;
+    font-size: 1.75rem;
+    color: var(--primary-color);
+    letter-spacing: -0.5px;
+}
+
+.user-login {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    color: var(--gray-700);
+    padding: 10px 18px;
+    background: var(--gray-100);
+    border-radius: var(--radius-lg);
+    transition: all 0.2s ease;
+    font-weight: 600;
+}
+
+.user-login:hover {
+    background: var(--primary-color);
+    color: white;
+}
+
+.user-icon {
+    font-size: 1.3rem;
+}
+
+.user-name {
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+
+/* ========================================
+   05. НИЖНЯЯ НАВИГАЦИЯ (Bottom Nav)
+   ======================================== */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 12px 0 16px 0;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    border-top: 1px solid var(--gray-200);
+}
+
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 16px;
+    text-decoration: none;
+    color: var(--gray-600);
+    transition: all 0.2s ease;
+    min-width: 70px;
+    border-radius: 12px;
+    margin: 0 4px;
+}
+
+.nav-item:hover {
+    background: var(--gray-100);
+    color: var(--primary-color);
+}
+
+.nav-item.active {
+    background: var(--primary-color);
+    color: white;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
+}
+
+.nav-item.active .nav-icon,
+.nav-item.active .nav-label {
+    color: white !important;
+}
+
+.nav-icon {
+    font-size: 1.8rem;
+    margin-bottom: 4px;
+    line-height: 1;
+}
+
+.nav-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* Скрываем старую навигацию */
+.nav-bar {
+    display: none;
+}
+
+.welcome-bar {
+    display: none;
+}
+
+
+/* ========================================
+   06. КАРТОЧКИ (Cards, Stats)
+   ======================================== */
+.card {
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow);
+    padding: 24px;
+    margin-bottom: 24px;
+}
+
+.card-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--gray-900);
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.stat-card {
+    background: white;
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    text-align: center;
+    box-shadow: var(--shadow);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.stat-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.stat-value.green { color: #10b981; }
+.stat-value.yellow { color: #f59e0b; }
+.stat-value.red { color: #ef4444; }
+.stat-value.blue { color: #4f46e5; }
+
+.stat-label {
+    color: var(--gray-600);
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 12px;
+    background: var(--gray-200);
+    border-radius: 6px;
+    overflow: hidden;
+    margin: 12px 0;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary-color), var(--primary-hover));
+    border-radius: 6px;
+    transition: width 0.3s ease;
+}
+
+
+/* ========================================
+   07. ТАБЛИЦЫ (Tables)
+   ======================================== */
+.table-container {
+    overflow-x: auto;
+    background: white;
+    border-radius: var(--radius);
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+}
+
+.data-table th,
+.data-table td {
+    padding: 14px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.data-table th {
+    background: var(--gray-100);
+    font-weight: 600;
+    color: var(--gray-700);
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.data-table tr:hover {
+    background: var(--gray-50);
+}
+
+.data-table tr:last-child td {
+    border-bottom: none;
+}
+
+
+/* ========================================
+   08. КОМПОНЕНТЫ (Buttons, Badges, Alerts)
+   ======================================== */
+
+/* Статусы */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.status-badge.success {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.status-badge.warning {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.status-badge.danger {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+/* Кнопки */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    border-radius: var(--radius);
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+    font-size: 0.95rem;
+}
+
+.btn-primary {
+    background: var(--primary-color);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: var(--primary-hover);
+}
+
+.btn-secondary {
+    background: var(--gray-200);
+    color: var(--gray-700);
+}
+
+.btn-secondary:hover {
+    background: var(--gray-300);
+}
+
+.btn-success {
+    background: var(--success-color);
+    color: white;
+}
+
+.btn-success:hover {
+    background: #059669;
+}
+
+.btn-outline {
+    background: transparent;
+    border: 1px solid var(--gray-300);
+    color: var(--gray-700);
+}
+
+.btn-outline:hover {
+    background: var(--gray-100);
+}
+
+/* Уведомления */
+.alert {
+    padding: 16px 20px;
+    border-radius: var(--radius);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.alert-success {
+    background: #d1fae5;
+    border: 1px solid #a7f3d0;
+    color: #065f46;
+}
+
+.alert-warning {
+    background: #fef3c7;
+    border: 1px solid #fde68a;
+    color: #92400e;
+}
+
+.alert-danger {
+    background: #fee2e2;
+    border: 1px solid #fecaca;
+    color: #991b1b;
+}
+
+/* Заголовок страницы */
+.page-header {
+    background: white;
+    padding: 24px;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow);
+    margin-bottom: 24px;
+}
+
+.page-title {
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin-bottom: 8px;
+}
+
+.page-subtitle {
+    color: var(--gray-600);
+    font-size: 0.95rem;
+}
+
+
+/* ========================================
+   09. ФОРМЫ (Forms, Inputs)
+   ======================================== */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: var(--gray-700);
+}
+
+.form-control {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid var(--gray-300);
+    border-radius: var(--radius);
+    font-size: 1rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.form-control:disabled {
+    background: var(--gray-100);
+    cursor: not-allowed;
+}
+
+.form-hint {
+    font-size: 0.875rem;
+    color: var(--gray-600);
+    margin-top: 6px;
+}
+
+.errorlist {
+    list-style: none;
+    color: var(--danger-color);
+    font-size: 0.875rem;
+    margin-top: 6px;
+}
+
+
+/* ========================================
+   10. АДАПТИВНОСТЬ (Media Queries)
+   ======================================== */
+
+@media (max-width: 768px) {
+    .header-container {
+        padding: 12px 16px;
+    }
+    
+    .logo-text {
+        font-size: 1.5rem;
+    }
+    
+    .logo-icon {
+        font-size: 1.75rem;
+    }
+    
+    .user-name {
+        display: none;
+    }
+    
+    .container {
+        padding: 12px;
+    }
+    
+    .page-header {
+        padding: 16px;
+    }
+    
+    .page-title {
+        font-size: 1.5rem;
+    }
+    
+    .card {
+        padding: 16px;
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .bottom-nav {
+        padding: 10px 0 14px 0;
+    }
+    
+    .nav-icon {
+        font-size: 1.6rem;
+    }
+    
+    .nav-label {
+        font-size: 0.7rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .logo-text {
+        font-size: 1.25rem;
+    }
+    
+    .container {
+        padding: 8px;
+    }
+    
+    .page-title {
+        font-size: 1.25rem;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .card {
+        padding: 12px;
+    }
+    
+    .bottom-nav {
+        padding: 8px 0 12px 0;
+    }
+    
+    .nav-item {
+        min-width: 60px;
+        padding: 6px 10px;
+    }
+    
+    .nav-icon {
+        font-size: 1.5rem;
+    }
+    
+    .nav-label {
+        font-size: 0.65rem;
+    }
+}
+
+/* Для больших экранов (десктоп) */
+@media (min-width: 1024px) {
+    .bottom-nav {
+        max-width: 600px;
+        left: 50%;
+        transform: translateX(-50%);
+        border-radius: 16px 16px 0 0;
+    }
+    
+    .main-content {
+        padding-bottom: 110px;
+    }
+}
+
+
+/* ========================================
+   11. ТЁМНАЯ ТЕМА (Dark Mode)
+   ======================================== */
+
+/* Тёмная тема по атрибуту data-theme */
+body[data-theme="dark"] {
+    --gray-50: #1a1b26;
+    --gray-100: #24283b;
+    --gray-200: #414868;
+    --gray-300: #565f89;
+    --gray-600: #a9b1d6;
+    --gray-700: #c0caf5;
+    --gray-900: #ffffff;
+    --primary-color: #7aa2f7;
+    --primary-hover: #5d87e5;
+    --success-color: #9ece6a;
+    --warning-color: #e0af68;
+    --danger-color: #f7768e;
+    background: #16161e;
+    color: #c0caf5;
+}
+
+body[data-theme="dark"] .top-header {
+    background: #1f2335;
+    border-bottom-color: #2f3549;
+}
+
+body[data-theme="dark"] .school-logo {
+    color: #7aa2f7;
+}
+
+body[data-theme="dark"] .user-login {
+    background: #24283b;
+    color: #c0caf5;
+}
+
+body[data-theme="dark"] .user-login:hover {
+    background: #7aa2f7;
+    color: #1a1b26;
+}
+
+body[data-theme="dark"] .card,
+body[data-theme="dark"] .page-header,
+body[data-theme="dark"] .table-container {
+    background: #1f2335;
+    border: 1px solid #2f3549;
+}
+
+body[data-theme="dark"] .bottom-nav {
+    background: #1f2335;
+    border-top-color: #2f3549;
+}
+
+body[data-theme="dark"] .nav-item {
+    color: #a9b1d6;
+}
+
+body[data-theme="dark"] .nav-item:hover {
+    background: #24283b;
+    color: #7aa2f7;
+}
+
+body[data-theme="dark"] .nav-item.active {
+    background: #7aa2f7;
+    color: #1a1b26 !important;
+    box-shadow: 0 4px 12px rgba(122, 162, 247, 0.4);
+}
+
+body[data-theme="dark"] .nav-item.active .nav-icon,
+body[data-theme="dark"] .nav-item.active .nav-label {
+    color: #1a1b26 !important;
+}
+
+body[data-theme="dark"] .data-table {
+    background: #1f2335;
+}
+
+body[data-theme="dark"] .data-table th {
+    background: #24283b;
+    color: #a9b1d6;
+    border-bottom-color: #414868;
+}
+
+body[data-theme="dark"] .data-table td {
+    color: #c0caf5;
+    border-bottom-color: #2f3549;
+    background: #1f2335;
+}
+
+body[data-theme="dark"] .data-table tr:hover td {
+    background: #24283b;
+}
+
+body[data-theme="dark"] .form-control {
+    background: #24283b;
+    border-color: #414868;
+    color: #c0caf5;
+}
+
+body[data-theme="dark"] .form-control:focus {
+    border-color: #7aa2f7;
+}
+
+body[data-theme="dark"] .status-badge.success {
+    background: rgba(158, 206, 106, 0.2);
+    color: #9ece6a;
+}
+
+body[data-theme="dark"] .status-badge.warning {
+    background: rgba(224, 175, 104, 0.2);
+    color: #e0af68;
+}
+
+body[data-theme="dark"] .status-badge.danger {
+    background: rgba(247, 118, 142, 0.2);
+    color: #f7768e;
+}
+
+body[data-theme="dark"] .stat-card {
+    background: #24283b;
+}
+
+body[data-theme="dark"] .stat-label {
+    color: #a9b1d6;
+}
+
+body[data-theme="dark"] .stat-value.green { color: #9ece6a; }
+body[data-theme="dark"] .stat-value.yellow { color: #e0af68; }
+body[data-theme="dark"] .stat-value.red { color: #f7768e; }
+body[data-theme="dark"] .stat-value.blue { color: #7aa2f7; }
+
+body[data-theme="dark"] .page-subtitle {
+    color: #a9b1d6;
+}
+
+body[data-theme="dark"] .card-title {
+    color: #c0caf5;
+    border-bottom-color: #2f3549;
+}
+
+body[data-theme="dark"] .form-label {
+    color: #c0caf5;
+}
+
+body[data-theme="dark"] .btn-outline {
+    border-color: #414868;
+    color: #c0caf5;
+}
+
+body[data-theme="dark"] .btn-outline:hover {
+    background: #24283b;
+}
+
+/* Тёмная тема по системной настройке (если нет data-theme) */
+@media (prefers-color-scheme: dark) {
+    body:not([data-theme="light"]) {
+        --gray-50: #1a1b26;
+        --gray-100: #24283b;
+        --gray-200: #414868;
+        --gray-300: #565f89;
+        --gray-600: #a9b1d6;
+        --gray-700: #c0caf5;
+        --gray-900: #ffffff;
+        --primary-color: #7aa2f7;
+        --primary-hover: #5d87e5;
+        --success-color: #9ece6a;
+        --warning-color: #e0af68;
+        --danger-color: #f7768e;
+    }
+    
+    body:not([data-theme="light"]) {
+        background: #16161e;
+        color: #c0caf5;
+    }
+    
+    body:not([data-theme="light"]) .top-header {
+        background: #1f2335;
+        border-bottom-color: #2f3549;
+    }
+    
+    body:not([data-theme="light"]) .school-logo {
+        color: #7aa2f7;
+    }
+    
+    body:not([data-theme="light"]) .user-login {
+        background: #24283b;
+        color: #c0caf5;
+    }
+    
+    body:not([data-theme="light"]) .user-login:hover {
+        background: #7aa2f7;
+        color: #1a1b26;
+    }
+    
+    body:not([data-theme="light"]) .card,
+    body:not([data-theme="light"]) .page-header,
+    body:not([data-theme="light"]) .table-container {
+        background: #1f2335;
+        border: 1px solid #2f3549;
+    }
+    
+    body:not([data-theme="light"]) .bottom-nav {
+        background: #1f2335;
+        border-top-color: #2f3549;
+    }
+    
+    body:not([data-theme="light"]) .nav-item {
+        color: #a9b1d6;
+    }
+    
+    body:not([data-theme="light"]) .nav-item:hover {
+        background: #24283b;
+        color: #7aa2f7;
+    }
+    
+    body:not([data-theme="light"]) .nav-item.active {
+        background: #7aa2f7;
+        color: #1a1b26 !important;
+        box-shadow: 0 4px 12px rgba(122, 162, 247, 0.4);
+    }
+    
+    body:not([data-theme="light"]) .nav-item.active .nav-icon,
+    body:not([data-theme="light"]) .nav-item.active .nav-label {
+        color: #1a1b26 !important;
+    }
+    
+    body:not([data-theme="light"]) .data-table {
+        background: #1f2335;
+    }
+    
+    body:not([data-theme="light"]) .data-table th {
+        background: #24283b;
+        color: #a9b1d6;
+        border-bottom-color: #414868;
+    }
+    
+    body:not([data-theme="light"]) .data-table td {
+        color: #c0caf5;
+        border-bottom-color: #2f3549;
+        background: #1f2335;
+    }
+    
+    body:not([data-theme="light"]) .data-table tr:hover td {
+        background: #24283b;
+    }
+    
+    body:not([data-theme="light"]) .form-control {
+        background: #24283b;
+        border-color: #414868;
+        color: #c0caf5;
+    }
+    
+    body:not([data-theme="light"]) .form-control:focus {
+        border-color: #7aa2f7;
+    }
+    
+    body:not([data-theme="light"]) .status-badge.success {
+        background: rgba(158, 206, 106, 0.2);
+        color: #9ece6a;
+    }
+    
+    body:not([data-theme="light"]) .status-badge.warning {
+        background: rgba(224, 175, 104, 0.2);
+        color: #e0af68;
+    }
+    
+    body:not([data-theme="light"]) .status-badge.danger {
+        background: rgba(247, 118, 142, 0.2);
+        color: #f7768e;
+    }
+    
+    body:not([data-theme="light"]) .stat-card {
+        background: #24283b;
+    }
+    
+    body:not([data-theme="light"]) .stat-label {
+        color: #a9b1d6;
+    }
+    
+    body:not([data-theme="light"]) .stat-value.green { color: #9ece6a; }
+    body:not([data-theme="light"]) .stat-value.yellow { color: #e0af68; }
+    body:not([data-theme="light"]) .stat-value.red { color: #f7768e; }
+    body:not([data-theme="light"]) .stat-value.blue { color: #7aa2f7; }
+    
+    body:not([data-theme="light"]) .page-subtitle {
+        color: #a9b1d6;
+    }
+    
+    body:not([data-theme="light"]) .card-title {
+        color: #c0caf5;
+        border-bottom-color: #2f3549;
+    }
+    
+    body:not([data-theme="light"]) .form-label {
+        color: #c0caf5;
+    }
+    
+    body:not([data-theme="light"]) .btn-outline {
+        border-color: #414868;
+        color: #c0caf5;
+    }
+    
+    body:not([data-theme="light"]) .btn-outline:hover {
+        background: #24283b;
+    }
+}

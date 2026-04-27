@@ -1,0 +1,19 @@
+from django.db import models
+from django.contrib.auth.models import User
+
+
+class ClientCabinetProfile(models.Model):
+    """Профиль клиента в личном кабинете"""
+    
+    user = models.OneToOneField(User, on_delete=models.CASCADE, verbose_name='Пользователь')
+    email_confirmed = models.BooleanField('Email подтверждён', default=False)
+    registration_approved = models.BooleanField('Регистрация одобрена', default=False)
+    created_at = models.DateTimeField('Дата создания', auto_now_add=True)
+    updated_at = models.DateTimeField('Дата обновления', auto_now=True)
+    
+    class Meta:
+        verbose_name = 'Профиль кабинета'
+        verbose_name_plural = 'Профили кабинета'
+    
+    def __str__(self):
+        return f'Кабинет: {self.user.username}'

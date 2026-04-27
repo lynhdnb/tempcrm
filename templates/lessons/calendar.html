@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block title %}Календарь — ERP{% endblock %}
+{% block page_title %}Календарь занятий{% endblock %}
+
+{% block content %}
+<div id="calendar" style="max-width: 1200px; margin: 0 auto;"></div>
+
+<!-- Modal for event details -->
+<div class="modal fade" id="eventModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalTitle"></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="modalBody"></div>
+      <div class="modal-footer">
+        <a href="#" id="editLink" class="btn btn-primary">Редактировать</a>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const calendarEl = document.getElementById('calendar');
+    const calendar = new FullCalendar.Calendar(calendarEl, {
+      initialView: 'dayGridMonth',
+      headerToolbar: {
+        left: 'prev,next today',
+        center: 'title',
+        right: 'dayGridMonth,timeGridWeek,timeGridDay'
+      },
+      events: '{% url "lesson_events_api" %}',
+      eventClick: function(info) {
+        const event = info.event;
+        const props = event.extendedProps;
+        document.getElementById('modalTitle').textContent = event.title;
+        document.getElementById('modalBody').innerHTML = `
+          <p><strong>Преподаватель:</strong> ${props.teacher}</p>
+          <p><strong>Кабинет:</strong> ${props.room}</p>
+          <p><strong>Время:</strong> ${event.start.toLocaleString()} – ${event.end.toLocaleString()}</p>
+          ${props.notes ? `<p><strong>Заметки:</strong> ${props.notes}</p>` : ''}
+        `;
+        document.getElementById('editLink').href = '/admin/lessons/lesson/' + event.id + '/change/';
+        const modal = new bootstrap.Modal(document.getElementById('eventModal'));
+        modal.show();
+      },
+      locale: 'ru'
+    });
+    calendar.render();
+  });
+</script>
+<style>
+  .fc-daygrid-day-frame {
+    cursor: pointer;
+  }
+</style>
+{% endblock %}

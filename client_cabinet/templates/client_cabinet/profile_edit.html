@@ -1,0 +1,144 @@
+{% extends 'client_cabinet/base.html' %}
+
+{% block title %}Редактирование профиля — MUSERP{% endblock %}
+
+{% block content %}
+<!-- Переключатель темы -->
+<div class="card">
+    <h2 class="card-title">🎨 Внешний вид</h2>
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <strong>Тёмная тема</strong>
+            <p style="color: var(--gray-600); font-size: 0.9rem; margin-top: 4px;">
+                Переключить светлую/тёмную тему оформления
+            </p>
+        </div>
+        <label class="theme-switch">
+            <input type="checkbox" id="theme-toggle">
+            <span class="slider"></span>
+        </label>
+    </div>
+</div>
+
+<style>
+.theme-switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}
+
+.theme-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: var(--primary-color);
+}
+
+input:checked + .slider:before {
+    transform: translateX(26px);
+}
+</style>
+
+<script>
+(function() {
+    const themeToggle = document.getElementById('theme-toggle');
+    if (!themeToggle) return;
+    
+    // Переключение темы (только обработчик клика)
+    themeToggle.addEventListener('change', function() {
+        if (this.checked) {
+            localStorage.setItem('theme', 'dark');
+            document.body.setAttribute('data-theme', 'dark');
+        } else {
+            localStorage.setItem('theme', 'light');
+            document.body.setAttribute('data-theme', 'light');
+        }
+    });
+})();
+</script>
+
+<!-- Заголовок -->
+<div class="page-header">
+    <h1 class="page-title">⚙️ Настройки профиля</h1>
+    <p class="page-subtitle">Управление контактной информацией и безопасностью</p>
+</div>
+
+<!-- Контакты -->
+<div class="card">
+    <h2 class="card-title">📞 Контактная информация</h2>
+    
+    <form method="post" style="max-width: 500px;">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label class="form-label" for="{{ form.phone.id_for_label }}">Телефон:</label>
+            {{ form.phone }}
+            {% if form.phone.errors %}
+                <ul class="errorlist">
+                    {% for error in form.phone.errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label">Email:</label>
+            <input type="email" class="form-control" value="{{ email }}" disabled>
+            <p class="form-hint">Email нельзя изменить. Для смены обратитесь к администратору.</p>
+        </div>
+        
+        <button type="submit" class="btn btn-primary">💾 Сохранить изменения</button>
+    </form>
+</div>
+
+<!-- Безопасность -->
+<div class="card">
+    <h2 class="card-title">🔐 Безопасность</h2>
+    <p style="color: var(--gray-600); margin-bottom: 16px;">
+        Регулярно меняйте пароль для защиты вашего аккаунта.
+    </p>
+    <a href="{% url 'client_cabinet:password_change' %}" class="btn btn-secondary">
+        🔑 Изменить пароль
+    </a>
+</div>
+
+<!-- Выход из аккаунта -->
+<div class="card" style="border-top: 2px solid var(--danger-color);">
+    <h2 class="card-title" style="color: var(--danger-color);">🚪 Выход из аккаунта</h2>
+    <p style="color: var(--gray-600); margin-bottom: 16px;">
+        Завершите сеанс работы в личном кабинете.
+    </p>
+    <a href="/accounts/logout/" class="btn btn-outline" style="border-color: var(--danger-color); color: var(--danger-color);">
+        🚪 Выйти из аккаунта
+    </a>
+</div>
+{% endblock %}

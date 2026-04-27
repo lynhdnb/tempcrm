@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block title %}Завершение задачи — ERP{% endblock %}
+{% block page_title %}Завершение задачи{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">📋 Задача: {{ interaction.content }}</h5>
+      </div>
+      <div class="card-body">
+        <p class="text-muted mb-3">Задача связана с занятием:</p>
+        
+        <!-- Информация о занятии -->
+        <div class="mb-4 p-3 bg-light rounded">
+          <div class="row">
+            <div class="col-3"><strong>Клиент:</strong></div>
+            <div class="col-9">{{ lesson.client.last_name }} {{ lesson.client.first_name }}</div>
+          </div>
+          <div class="row">
+            <div class="col-3"><strong>Дата:</strong></div>
+            <div class="col-9">{{ lesson.start_time|date:"d.m.Y H:i" }}</div>
+          </div>
+          <div class="row">
+            <div class="col-3"><strong>Кабинет:</strong></div>
+            <div class="col-9">{{ lesson.room.name }}</div>
+          </div>
+          <div class="row">
+            <div class="col-3"><strong>Текущий статус:</strong></div>
+            <div class="col-9">{{ lesson.get_status_display }}</div>
+          </div>
+        </div>
+        
+        <form method="post">
+          {% csrf_token %}
+          
+          <div class="mb-3">
+            <label class="form-label fw-bold">Что произошло с занятием? <span class="text-danger">*</span></label>
+            
+            <div class="mb-3">
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="lesson_outcome" id="confirmed" value="confirmed" required>
+                <label class="form-check-label fw-bold" for="confirmed">
+                  ✅ Клиент подтвердил посещение
+                </label>
+                <small class="text-muted d-block ms-4">Клиент придёт на занятие (статус: «Подтверждено»)</small>
+              </div>
+            </div>
+            
+            <div class="mb-3">
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="lesson_outcome" id="completed" value="completed">
+                <label class="form-check-label fw-bold" for="completed">
+                  ✔️ Занятие проведено
+                </label>
+                <small class="text-muted d-block ms-4">Клиент пришёл и занимался (статус: «Проведено», баланс списан)</small>
+              </div>
+            </div>
+            
+            <div class="mb-3">
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="lesson_outcome" id="no_show" value="no_show">
+                <label class="form-check-label fw-bold" for="no_show">
+                  ❌ Клиент не явился
+                </label>
+                <small class="text-muted d-block ms-4">Клиент не пришёл без предупреждения (статус: «Не явился», баланс списан)</small>
+              </div>
+            </div>
+          </div>
+          
+          <button type="submit" class="btn btn-primary">Подтвердить</button>
+          <a href="{% url 'client_detail' interaction.client.id %}" class="btn btn-secondary">Отмена</a>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

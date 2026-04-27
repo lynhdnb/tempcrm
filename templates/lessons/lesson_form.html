@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+
+{% block title %}Новое занятие — ERP{% endblock %}
+{% block page_title %}Новое занятие{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-8">
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert alert-success">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+
+    <form method="post" id="lesson-form">
+      {% csrf_token %}
+      
+      <!-- Скрытое поле template_type -->
+      <input type="hidden" name="template_type" id="id_template_type" value="lesson+practice">
+      
+      <!-- Тип сессии (карточки) -->
+      <div class="mb-4">
+        <label class="form-label fw-bold">Тип сессии</label>
+        <div class="row g-2">
+          <div class="col-12 col-md-6">
+            <div class="card template-card border-primary" style="cursor:pointer;" 
+                 onclick="selectTemplate('lesson+practice')">
+              <div class="card-body text-center">
+                <strong>📚 Занятие + Практика</strong><br>
+                <small class="text-muted">2 часа (1ч + 1ч)</small>
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-md-6">
+            <div class="card template-card" style="cursor:pointer;" 
+                 onclick="selectTemplate('practice+practice')">
+              <div class="card-body text-center">
+                <strong>🎧 Практика + Практика</strong><br>
+                <small class="text-muted">2 часа практики</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Клиент -->
+      <div class="mb-3">
+        <label class="form-label fw-bold">Клиент <span class="text-danger">*</span></label>
+        {{ form.client }}
+        {% if form.client.errors %}
+          <div class="text-danger">{{ form.client.errors }}</div>
+        {% endif %}
+      </div>
+
+      <!-- Преподаватель (всегда виден, но может быть disabled) -->
+      <div class="mb-3">
+        <label class="form-label fw-bold">Преподаватель <span class="text-danger" id="teacher-required">*</span></label>
+        {{ form.teacher }}
+        {% if form.teacher.errors %}
+          <div class="text-danger">{{ form.teacher.errors }}</div>
+        {% endif %}
+      </div>
+
+      <!-- Кабинет -->
+      <div class="mb-3">
+        <label class="form-label fw-bold">Кабинет <span class="text-danger">*</span></label>
+        {{ form.room }}
+        {% if form.room.errors %}
+          <div class="text-danger">{{ form.room.errors }}</div>
+        {% endif %}
+      </div>
+
+      <!-- Дата и время начала -->
+      <div class="mb-3">
+        <label class="form-label fw-bold">Дата и время начала <span class="text-danger">*</span></label>
+        {{ form.start_time }}
+        {% if form.start_time.errors %}
+          <div class="text-danger">{{ form.start_time.errors }}</div>
+        {% endif %}
+      </div>
+
+      <!-- Заметки (чекбокс → поле) -->
+      <div class="mb-3">
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="notesToggle" onchange="toggleNotesField()">
+          <label class="form-check-label" for="notesToggle">
+            Добавить комментарий к занятию
+          </label>
+        </div>
+        <div id="notesField" style="display:none; margin-top:10px;">
+          {{ form.notes }}
+          {% if form.notes.errors %}
+            <div class="text-danger">{{ form.notes.errors }}</div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Общие ошибки формы -->
+      {% if form.non_field_errors %}
+        <div class="alert alert-danger">
+          {% for error in form.non_field_errors %}
+            {{ error }}<br>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      <button type="submit" class="btn btn-primary btn-lg">Сохранить запись</button>
+      <a href="{% url 'lesson_list' %}" class="btn btn-secondary btn-lg">Отмена</a>
+    </form>
+  </div>
+</div>
+
+<script>
+function selectTemplate(type) {
+  document.querySelectorAll('.template-card').forEach(el => {
+    el.classList.remove('border-primary');
+    el.style.backgroundColor = '';
+  });
+  
+  event.currentTarget.classList.add('border-primary');
+  event.currentTarget.style.backgroundColor = '#f0f8ff';
+  
+  document.getElementById('id_template_type').value = type;
+  
+  const teacherSelect = document.querySelector('select[name="teacher"]');
+  const teacherRequired = document.getElementById('teacher-required');
+  const firstOption = teacherSelect.querySelector('option[value=""]');
+  
+  if (type === 'lesson+practice') {
+    teacherSelect.disabled = false;
+    teacherSelect.required = true;
+    teacherRequired.style.display = 'inline';
+    if (firstOption) firstOption.text = '---------';
+  } else {
+    teacherSelect.disabled = true;
+    teacherSelect.required = false;
+    teacherSelect.value = '';
+    teacherRequired.style.display = 'none';
+    if (firstOption) firstOption.text = 'Не требуется для самостоятельной практики';
+  }
+}
+
+function toggleNotesField() {
+  const checkbox = document.getElementById('notesToggle');
+  const notesField = document.getElementById('notesField');
+  notesField.style.display = checkbox.checked ? 'block' : 'none';
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  selectTemplate('lesson+practice');
+});
+</script>
+
+<style>
+.template-card {
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+.template-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+.template-card.border-primary {
+  border-width: 1px !important;
+}
+select:disabled {
+  background-color: #e9ecef;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+#teacher-hint {
+  height: 0;
+  overflow: hidden;
+  transition: height 0.2s ease;
+}
+#teacher-hint small {
+  display: block;
+  padding-top: 4px;
+}
+</style>
+{% endblock %}

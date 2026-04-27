@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Новая продажа</title>
+    <link href="/static/admin/css/base.css" rel="stylesheet">
+    <style>
+        .form-container { max-width: 800px; margin: 20px auto; padding: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, select { width: 100%; padding: 8px; box-sizing: border-box; }
+        .submit-btn { background: #79aec8; color: white; padding: 10px 20px; border: none; cursor: pointer; }
+        .submit-btn:hover { background: #609ab6; }
+        .messages { margin-bottom: 20px; }
+        .success { color: green; }
+    </style>
+</head>
+<body>
+<div class="form-container">
+    <h2>Новая продажа</h2>
+
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="success">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <form method="post" id="enrollment-form">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+
+        {% for field in form %}
+        <div class="form-group">
+            {{ field.label_tag }}
+            {{ field }}
+            {% if field.help_text %}
+                <small style="color: #666;">{{ field.help_text }}</small>
+            {% endif %}
+            {{ field.errors }}
+        </div>
+        {% endfor %}
+
+        <button type="submit" class="submit-btn">Создать продажу</button>
+    </form>
+
+    <br>
+    <a href="{% url 'admin:index' %}">← Назад в админку</a>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const productSelect = document.querySelector('#id_product');
+    const lessonsInput = document.querySelector('#id_lessons_total');
+    const practicesInput = document.querySelector('#id_practices_total');
+    const priceInput = document.querySelector('#id_price');
+
+    if (!productSelect || !lessonsInput || !practicesInput || !priceInput) {
+        return;
+    }
+
+    productSelect.addEventListener('change', function () {
+        const productId = this.value;
+        if (!productId) {
+            // Сброс значений, если "пустой" выбор
+            lessonsInput.value = '';
+            practicesInput.value = '';
+            priceInput.value = '';
+            return;
+        }
+
+        fetch(`/sales/api/product-details/?product_id=${productId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert('Ошибка загрузки данных продукта');
+                    return;
+                }
+                lessonsInput.value = data.base_lessons;
+                practicesInput.value = data.base_practices;
+                priceInput.value = data.default_price;
+            })
+            .catch(err => {
+                console.error('AJAX error:', err);
+                alert('Не удалось загрузить данные продукта');
+            });
+    });
+});
+</script>
+</body>
+</html>

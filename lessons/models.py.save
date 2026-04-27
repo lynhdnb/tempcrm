@@ -1,0 +1,45 @@
+nano lessons/models.pyfrom django.db import models
+
+class Room(models.Model):
+    name = models.CharField('Название', max_length=100, unique=True)
+    description = models.TextField('Описание', blank=True)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = 'Кабинет'
+        verbose_name_plural = 'Кабинеты'
+
+from django.db import models
+from clients.models import Client
+from core.models import UserProfile
+
+class Lesson(models.Model):
+    client = models.ForeignKey(
+        Client,
+        on_delete=models.CASCADE,
+        verbose_name='Клиент'
+    )
+    teacher = models.ForeignKey(
+        UserProfile,
+        on_delete=models.CASCADE,
+        limit_choices_to={'role': 'teacher'},
+        verbose_name='Преподаватель'
+    )
+    room = models.ForeignKey(
+        Room,
+        on_delete=models.PROTECT,
+        verbose_name='Кабинет'
+    )
+    start_time = models.DateTimeField('Начало')
+    end_time = models.DateTimeField('Окончание')
+    notes = models.TextField('Заметки', blank=True)
+
+    def __str__(self):
+        return f"{self.client} — {self.start_time.strftime('%d.%m %H:%M')}"
+
+    class Meta:
+        verbose_name = 'Занятие'
+        verbose_name_plural = 'Занятия'
+        ordering = ['-start_time']

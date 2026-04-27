@@ -1,0 +1,90 @@
+{% extends 'client_cabinet/base_simple.html' %}
+
+{% block title %}Регистрация — MUSERP{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 500px; margin: 40px auto;">
+    <h2 class="card-title" style="text-align: center;">🎵 Регистрация в личном кабинете</h2>
+    <p style="color: var(--gray-600); text-align: center; margin-bottom: 24px;">
+        Введите данные для доступа к личному кабинету
+    </p>
+    
+    <form method="post">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label class="form-label" for="{{ form.username.id_for_label }}">Логин:</label>
+            {{ form.username }}
+            {% if form.username.errors %}
+                <ul class="errorlist">
+                    {% for error in form.username.errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label" for="{{ form.email.id_for_label }}">Email:</label>
+            {{ form.email }}
+            {% if form.email.errors %}
+                <ul class="errorlist">
+                    {% for error in form.email.errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label" for="{{ form.password1.id_for_label }}">Пароль:</label>
+            {{ form.password1 }}
+            {% if form.password1.errors %}
+                <ul class="errorlist">
+                    {% for error in form.password1.errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label" for="{{ form.password2.id_for_label }}">Подтверждение пароля:</label>
+            {{ form.password2 }}
+            {% if form.password2.errors %}
+                <ul class="errorlist">
+                    {% for error in form.password2.errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label" for="{{ form.phone.id_for_label }}">Телефон:</label>
+            {{ form.phone }}
+            {% if form.phone.errors %}
+                <ul class="errorlist">
+                    {% for error in form.phone.errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+        
+        {% if form.non_field_errors %}
+            <div class="alert alert-danger">
+                {{ form.non_field_errors.0 }}
+            </div>
+        {% endif %}
+        
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 24px;">
+            🚀 Зарегистрироваться
+        </button>
+    </form>
+    
+    <p style="text-align: center; margin-top: 24px; color: var(--gray-600);">
+        Уже есть аккаунт? <a href="/accounts/login/" style="color: var(--primary-color);">Войти</a>
+    </p>
+</div>
+{% endblock %}

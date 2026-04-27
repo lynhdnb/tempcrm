@@ -1,0 +1,60 @@
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+
+@login_required
+def dashboard(request):
+    return render(request, 'core/dashboard.html')
+
+from django.shortcuts import render
+from django.http import HttpResponseForbidden
+
+def handler403(request, exception=None):
+    return render(request, '403.html', status=403)
+
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from django import forms
+from .models import UserProfile
+
+class ProfileForm(forms.ModelForm):
+    class Meta:
+        model = UserProfile
+        fields = ['phone']
+        widgets = {
+            'phone': forms.TextInput(attrs={'class': 'form-control'}),
+        }
+
+@login_required
+def profile_view(request):
+    profile = request.user.profile
+    if request.method == 'POST':
+        form = ProfileForm(request.POST, instance=profile)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Телефон успешно обновлён.')
+            return redirect('profile')
+    else:
+        form = ProfileForm(instance=profile)
+    
+    return render(request, 'core/profile.html', {
+        'form': form,
+        'user': request.user,
+        'profile': profile
+    })
+
+from django.contrib.auth import login
+from django.shortcuts import redirect, get_object_or_404
+from django.contrib.auth.models import User
+from django.contrib import messages
+
+def impersonate_user(request, user_id):
+    if not request.user.is_superuser:
+        messages.error(request, "Доступ запрещён")
+        return redirect('manager_dashboard')
+    
+    user = get_object_or_404(User, id=user_id)
+    login(request, user)
+    messages.success(request, f"Вы вошли как {user.username}")
+    return redirect('manager_dashboard')
+
+nano core/views.py

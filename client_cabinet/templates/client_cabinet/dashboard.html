@@ -1,0 +1,50 @@
+{% extends 'client_cabinet/base.html' %}
+
+{% block title %}Главная — MUSERP{% endblock %}
+
+{% block content %}
+<!-- Заголовок -->
+<div class="page-header">
+    <h1 class="page-title">Добро пожаловать, {{ client.first_name|default:user.username }}! 👋</h1>
+    <p class="page-subtitle">Это ваш личный кабинет студента</p>
+</div>
+
+<!-- Информация о профиле -->
+<div class="card">
+    <h2 class="card-title">📋 Ваша информация</h2>
+    <div style="display: grid; gap: 12px;">
+        <div><strong>📧 Email:</strong> {{ user.email }}</div>
+        <div><strong>📱 Телефон:</strong> {{ user.clientcabinetprofile.phone|default:"Не указан" }}</div>
+        <div><strong>👤 Имя:</strong> {{ client.last_name|default:"—" }} {{ client.first_name|default:"—" }}</div>
+    </div>
+</div>
+
+<!-- Ближайшее занятие (если есть) -->
+{% if next_lesson %}
+<div class="card" style="border-left: 4px solid var(--primary-color);">
+    <h2 class="card-title">🔜 Ближайшее занятие</h2>
+    <div style="display: grid; gap: 8px;">
+        <div><strong>Дата:</strong> {{ next_lesson.start_time|date:"d.m.Y" }}</div>
+        <div><strong>Время:</strong> {{ next_lesson.start_time|time:"H:i" }} - {{ next_lesson.end_time|time:"H:i" }}</div>
+        <div><strong>Преподаватель:</strong> {{ next_lesson.teacher }}</div>
+        <div><strong>Кабинет:</strong> {{ next_lesson.room.name }}</div>
+    </div>
+    <a href="{% url 'client_cabinet:schedule' %}" class="btn btn-primary" style="margin-top: 16px;">
+        📅 Всё расписание
+    </a>
+</div>
+{% endif %}
+
+<!-- Активные курсы (кратко) -->
+{% if active_courses_count %}
+<div class="card">
+    <h2 class="card-title">📚 Ваши активные курсы</h2>
+    <p style="color: var(--gray-600); margin-bottom: 16px;">
+        У вас {{ active_courses_count }} активных курсов
+    </p>
+    <a href="{% url 'client_cabinet:courses' %}" class="btn btn-primary">
+        📖 Перейти к курсам
+    </a>
+</div>
+{% endif %}
+{% endblock %}

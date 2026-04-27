@@ -1,0 +1,43 @@
+
+{% extends "base.html" %}
+
+{% block title %}Клиент — {{ client.last_name }} {{ client.first_name }}{% endblock %}
+
+{% block page_title %}Клиент: {{ client.last_name }} {{ client.first_name }}{% endblock %}
+
+{% block content %}
+<div class="client-card">
+  <h2>Основная информация</h2>
+  <p><strong>Имя:</strong> {{ client.first_name }}</p>
+  <p><strong>Фамилия:</strong> {{ client.last_name }}</p>
+  <p><strong>Телефон:</strong> {{ client.phone }}</p>
+  {% if client.email %}
+    <p><strong>Email:</strong> {{ client.email }}</p>
+  {% endif %}
+  <p><strong>Статус:</strong> {{ client.get_status_display }}</p>
+<!--  <p><strong>Менеджер:</strong> {{ client.manager.first_name|default:client.manager.username|default:"— не назначен —" }}</p> -->
+
+  <h2>Быстрые действия</h2>
+  <div class="quick-actions">
+    <button class="btn btn-primary">📞 Звонок</button>
+    <button class="btn btn-success">📅 Запись на занятие</button>
+    <button class="btn btn-warning">📝 Создать задачу</button>
+    <button class="btn btn-info">🔔 Напоминание</button>
+  </div>
+
+  <h2>Лог взаимодействий</h2>
+  {% if interactions %}
+    {% for interaction in interactions %}
+      <div class="interaction-item">
+        <small>{{ interaction.created_at|date:"d.m.Y H:i" }} — 
+          {{ interaction.get_interaction_type_display }} 
+          ({{ interaction.created_by.first_name|default:interaction.created_by.username }})
+        </small>
+        <p>{{ interaction.content|linebreaks }}</p>
+      </div>
+    {% endfor %}
+  {% else %}
+    <p>Нет записей.</p>
+  {% endif %}
+</div>
+{% endblock %}
