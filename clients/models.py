@@ -9,10 +9,10 @@ class Client(models.Model):
     ]
     first_name = models.CharField('Имя', max_length=100)
     last_name = models.CharField('Фамилия', max_length=100)
-    phone = models.CharField('Телефон', max_length=20)
-    email = models.EmailField('Email', blank=True)
-    status = models.CharField('Статус', max_length=20, choices=STATUS_CHOICES, default='new')
-    created_at = models.DateTimeField('Создан', auto_now_add=True)
+    phone = models.CharField('Телефон', max_length=20, db_index=True)
+    email = models.EmailField('Email', blank=True, db_index=True)
+    status = models.CharField('Статус', max_length=20, choices=STATUS_CHOICES, default='new', db_index=True)
+    created_at = models.DateTimeField('Создан', auto_now_add=True, db_index=True)
     
 # Новое поле:
 #    manager = models.ForeignKey(
@@ -39,8 +39,8 @@ class Interaction(models.Model):
         ('enrollment', 'Запись на занятие'),
     ]
 
-    client = models.ForeignKey(Client, on_delete=models.CASCADE, verbose_name='Клиент')
-    interaction_type = models.CharField('Тип', max_length=20, choices=TYPE_CHOICES)
+    client = models.ForeignKey(Client, on_delete=models.CASCADE, verbose_name='Клиент', db_index=True)
+    interaction_type = models.CharField('Тип', max_length=20, choices=TYPE_CHOICES, db_index=True)
     
     # Основное содержание
     content = models.TextField('Содержание', blank=True)

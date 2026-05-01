@@ -57,8 +57,9 @@ class Enrollment(models.Model):
         ('archived', 'Архив'),
     ]
 
-    client = models.ForeignKey(Client, on_delete=models.CASCADE, verbose_name='Клиент')
-    product = models.ForeignKey(Product, on_delete=models.PROTECT, verbose_name='Продукт (шаблон)')
+    client = models.ForeignKey(Client, on_delete=models.CASCADE, verbose_name='Клиент', db_index=True)
+    product = models.ForeignKey(Product, on_delete=models.PROTECT, verbose_name='Продукт (шаблон)', db_index=True)
+    status = models.CharField('Статус', max_length=20, choices=STATUS_CHOICES, default='active', db_index=True)
     
     # Фактические лимиты (могут отличаться от шаблона)
     lessons_total = models.PositiveIntegerField('Всего занятий', default=0)
@@ -212,7 +213,8 @@ class PaymentMethod(models.Model):
         ordering = ['name']
 
 class Payment(models.Model):
-    enrollment = models.ForeignKey('Enrollment', on_delete=models.CASCADE, verbose_name='Запись на продукт')
+    enrollment = models.ForeignKey('Enrollment', on_delete=models.CASCADE, verbose_name='Запись на продукт', db_index=True)
+    is_paid = models.BooleanField('Оплачен', default=False, db_index=True)
     
     # Суммы
     amount_paid_by_client = models.DecimalField(

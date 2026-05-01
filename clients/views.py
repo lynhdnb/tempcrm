@@ -12,7 +12,7 @@ from django.contrib.auth.models import User
 
 @role_required(['owner', 'admin', 'manager'])
 def client_list(request):
-    clients = Client.objects.all()
+    clients = Client.objects.select_related('manager').all()
     return render(request, 'clients/client_list.html', {'clients': clients})
 
 
@@ -32,7 +32,7 @@ def client_create(request):
 @role_required(['owner', 'admin', 'manager'])
 def client_detail(request, client_id):
     client = get_object_or_404(Client, id=client_id)
-    interactions = Interaction.objects.filter(client=client).order_by('-created_at')
+    interactions = Interaction.objects.filter(client=client).select_related('created_by', 'assigned_to').order_by('-created_at')
     
     # Получаем все записи на курсы
     enrollments = client.enrollment_set.select_related('product').all()
@@ -47,7 +47,7 @@ def client_detail(request, client_id):
         client=client,
         interaction_type='task',
         is_completed=False
-    ).order_by('deadline')
+    ).select_related('assigned_to').order_by('deadline')
     
     # === Занятия клиента (только 2 ключевых) ===
     from lessons.models import Lesson

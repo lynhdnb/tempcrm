@@ -35,7 +35,8 @@ class Lesson(models.Model):
     client = models.ForeignKey(
         Client,
         on_delete=models.CASCADE,
-        verbose_name='Клиент'
+        verbose_name='Клиент',
+        db_index=True
     )
     teacher = models.ForeignKey(
         UserProfile,
@@ -43,33 +44,38 @@ class Lesson(models.Model):
         null=True,
         blank=True,
         limit_choices_to={'role': 'teacher'},
-        verbose_name='Преподаватель'
+        verbose_name='Преподаватель',
+        db_index=True
     )
     room = models.ForeignKey(
         Room,
         on_delete=models.PROTECT,
-        verbose_name='Кабинет'
+        verbose_name='Кабинет',
+        db_index=True
     )
     enrollment = models.ForeignKey(
         Enrollment,
         on_delete=models.PROTECT,
         null=True,
         blank=True,
-        verbose_name='Абонемент'
+        verbose_name='Абонемент',
+        db_index=True
     )
     lesson_type = models.CharField(
         'Тип',
         max_length=20,
         choices=TYPE_CHOICES,
-        default='lesson'
+        default='lesson',
+        db_index=True
     )
     status = models.CharField(
         'Статус',
         max_length=30,
         choices=STATUS_CHOICES,
-        default='scheduled'
+        default='scheduled',
+        db_index=True
     )
-    start_time = models.DateTimeField('Начало')
+    start_time = models.DateTimeField('Начало', db_index=True)
     end_time = models.DateTimeField('Окончание')
     notes = models.TextField('Заметки', blank=True)
     
@@ -189,6 +195,8 @@ class Lesson(models.Model):
         if not self.enrollment:
             return None
         
+        from django.db.models import Count, Q
+        
         if self.status in ['completed', 'no_show']:
             # Для завершённых или неявок — считаем по факту
             completed_count = Lesson.objects.filter(
@@ -226,7 +234,7 @@ class Lesson(models.Model):
         """Красивое отображение номера"""
         num = self.get_lesson_number()
         if num:
-            if self.status in ['completed', 'cancelled_with_charge']:
+            if self.status in ['completed', 'no_show']:
                 return f"№{num}"
             else:
                 return f"№{num} (ожидается)"
