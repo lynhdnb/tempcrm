@@ -1,0 +1,284 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Платёж {{ payment.invoice_number }} — MUSERP{% endblock %}
+
+{% block content %}
+
+<style>
+.detail-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: var(--space-md);
+}
+
+.info-section {
+    margin-bottom: var(--space-md);
+}
+
+.info-section h3 {
+    font-size: 14px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-bottom: var(--space-sm);
+    border-bottom: 1px solid var(--glass-border);
+    padding-bottom: 8px;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.info-label {
+    color: var(--text-muted);
+    font-size: 13px;
+}
+
+.info-value {
+    font-weight: 500;
+    font-size: 13px;
+}
+
+.amount-large {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: var(--radius-full);
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-completed { background: rgba(16, 185, 129, 0.15); color: var(--success); }
+.status-pending { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
+.status-cancelled { background: rgba(239, 68, 68, 0.15); color: var(--error); }
+.status-refunded { background: rgba(156, 163, 175, 0.15); color: #9ca3af; }
+
+.action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+.btn-action-large {
+    padding: 12px 16px;
+    border-radius: var(--radius-md);
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s;
+    text-decoration: none;
+}
+
+.btn-pay {
+    background: linear-gradient(135deg, var(--primary), #00b8c4);
+    color: #000;
+}
+
+.btn-pay:hover {
+    box-shadow: 0 0 20px rgba(0, 219, 233, 0.4);
+}
+
+.btn-edit {
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    border: 1px solid var(--glass-border);
+}
+
+.btn-edit:hover {
+    background: var(--bg-surface-high);
+    border-color: var(--primary);
+}
+
+.btn-danger {
+    background: transparent;
+    color: var(--error);
+    border: 1px solid var(--error);
+}
+
+.btn-danger:hover {
+    background: var(--error);
+    color: #fff;
+}
+</style>
+
+<div class="page-header">
+    <div>
+        <h1>💰 Платёж {{ payment.invoice_number|default:"№" }}</h1>
+        <p>Детали платежа</p>
+    </div>
+    <div class="page-actions">
+        <a href="{% url 'core:payments_list' %}" class="btn-secondary">
+            <span class="material-symbols-outlined">arrow_back</span>
+            Назад
+        </a>
+    </div>
+</div>
+
+<div class="detail-grid">
+    <!-- Левая колонка: Основная информация -->
+    <div class="glass-card">
+        <div class="info-section">
+            <h3>Сумма</h3>
+            <div class="amount-large">{{ payment.amount|floatformat:2 }} ₽</div>
+            {% if payment.paid_amount > 0 %}
+            <div style="font-size: 14px; color: var(--text-muted); margin-top: 8px;">
+                Оплачено: {{ payment.paid_amount|floatformat:2 }} ₽
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="info-section">
+            <h3>Информация о клиенте</h3>
+            <div class="info-row">
+                <span class="info-label">Клиент</span>
+                <a href="{% url 'core:client_detail' payment.client.pk %}" style="color: var(--primary);">
+                    {{ payment.client.last_name }} {{ payment.client.first_name }}
+                </a>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Телефон</span>
+                <span>{{ payment.client.phone }}</span>
+            </div>
+            {% if payment.client.email %}
+            <div class="info-row">
+                <span class="info-label">Email</span>
+                <span>{{ payment.client.email }}</span>
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="info-section">
+            <h3>Детали платежа</h3>
+            <div class="info-row">
+                <span class="info-label">Статус</span>
+                {% if payment.status == 'COMPLETED' %}
+                    <span class="status-badge status-completed">✓ Оплачено</span>
+                {% elif payment.status == 'PENDING' %}
+                    <span class="status-badge status-pending">⏳ Ожидает</span>
+                {% elif payment.status == 'CANCELLED' %}
+                    <span class="status-badge status-cancelled">✕ Отменено</span>
+                {% else %}
+                    <span class="status-badge status-refunded">↺ Возвращено</span>
+                {% endif %}
+            </div>
+            <div class="info-row">
+                <span class="info-label">Способ оплаты</span>
+                <span>{{ payment.method.name|default:"Не указано" }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Тип оплаты</span>
+                <span>{{ payment.get_payment_type_display }}</span>
+            </div>
+            {% if payment.installment_number and payment.total_installments %}
+            <div class="info-row">
+                <span class="info-label">Рассрочка</span>
+                <span>Платеж {{ payment.installment_number }} из {{ payment.total_installments }}</span>
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="info-section">
+            <h3>Даты</h3>
+            <div class="info-row">
+                <span class="info-label">Создан</span>
+                <span>{{ payment.created_at|date:"d.m.Y H:i" }}</span>
+            </div>
+            {% if payment.due_date %}
+            <div class="info-row">
+                <span class="info-label">Срок оплаты</span>
+                <span>{{ payment.due_date|date:"d.m.Y" }}</span>
+            </div>
+            {% endif %}
+            {% if payment.paid_at %}
+            <div class="info-row">
+                <span class="info-label">Оплачен</span>
+                <span>{{ payment.paid_at|date:"d.m.Y H:i" }}</span>
+            </div>
+            {% endif %}
+        </div>
+        
+        {% if payment.description %}
+        <div class="info-section">
+            <h3>Описание</h3>
+            <p style="color: var(--text-muted); font-size: 13px; line-height: 1.6;">
+                {{ payment.description }}
+            </p>
+        </div>
+        {% endif %}
+        
+        {% if payment.enrollment %}
+        <div class="info-section">
+            <h3>Запись на курс</h3>
+            <div class="info-row">
+                <span class="info-label">Курс</span>
+                <a href="{% url 'core:course_detail' payment.enrollment.course.pk %}" style="color: var(--primary);">
+                    {{ payment.enrollment.course.name }}
+                </a>
+            </div>
+        </div>
+        {% endif %}
+        
+        {% if payment.contract %}
+        <div class="info-section">
+            <h3>Договор</h3>
+            <div class="info-row">
+                <span class="info-label">Номер</span>
+                <span>{{ payment.contract.contract_number }}</span>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- Правая колонка: Действия -->
+    <div>
+        <div class="glass-card">
+            <h3 style="margin-bottom: var(--space-md);">Действия</h3>
+            
+            <div class="action-buttons">
+                {% if payment.status == 'PENDING' %}
+                <a href="{% url 'core:payment_pay' payment.pk %}" class="btn-action-large btn-pay">
+                    <span class="material-symbols-outlined">check</span>
+                    Отметить как оплаченный
+                </a>
+                {% endif %}
+                
+                <a href="{% url 'core:payment_update' payment.pk %}" class="btn-action-large btn-edit">
+                    <span class="material-symbols-outlined">edit</span>
+                    Редактировать
+                </a>
+                
+                <a href="{% url 'core:payment_delete' payment.pk %}" class="btn-action-large btn-danger">
+                    <span class="material-symbols-outlined">delete</span>
+                    Удалить
+                </a>
+            </div>
+        </div>
+        
+        <div class="glass-card" style="margin-top: var(--space-md);">
+            <h3 style="margin-bottom: var(--space-md);">Быстрая информация</h3>
+            <div class="info-row">
+                <span class="info-label">ID платежа</span>
+                <span>#{{ payment.pk }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Обработал</span>
+                <span>{{ payment.processed_by.get_full_name|default:payment.processed_by.username|default:"-" }}</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ action|title }} клиента — MUSERP{% endblock %}
+
+{% block content %}
+    <div class="page-header">
+        <div>
+            <h1>{% if action == 'create' %}➕ Добавить клиента{% else %}✏️ Редактировать клиента{% endif %}</h1>
+            <p>{{ action|title }} записи в системе</p>
+        </div>
+        <div class="page-actions">
+            <a href="{% url 'core:client_list' %}" class="btn-secondary">
+                <span class="material-symbols-outlined">arrow_back</span>
+                Назад
+            </a>
+        </div>
+    </div>
+
+    <div class="glass-card" style="padding: var(--space-md); max-width: 600px;">
+        <form method="post">
+            {% csrf_token %}
+            
+            <div style="display: grid; gap: var(--space-md);">
+                <div>
+                    <label style="display: block; color: var(--text-muted); font-size: 14px; margin-bottom: 8px;">Фамилия *</label>
+                    <input type="text" name="last_name" value="{{ client.last_name|default:'' }}" required
+                           style="width: 100%; padding: 12px; background: var(--bg-surface); border: 1px solid var(--glass-border); border-radius: var(--radius-md); color: var(--text-primary);">
+                </div>
+
+                <div>
+                    <label style="display: block; color: var(--text-muted); font-size: 14px; margin-bottom: 8px;">Имя *</label>
+                    <input type="text" name="first_name" value="{{ client.first_name|default:'' }}" required
+                           style="width: 100%; padding: 12px; background: var(--bg-surface); border: 1px solid var(--glass-border); border-radius: var(--radius-md); color: var(--text-primary);">
+                </div>
+
+                <div>
+                    <label style="display: block; color: var(--text-muted); font-size: 14px; margin-bottom: 8px;">Отчество</label>
+                    <input type="text" name="middle_name" value="{{ client.middle_name|default:'' }}"
+                           style="width: 100%; padding: 12px; background: var(--bg-surface); border: 1px solid var(--glass-border); border-radius: var(--radius-md); color: var(--text-primary);">
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-sm);">
+                    <div>
+                        <label style="display: block; color: var(--text-muted); font-size: 14px; margin-bottom: 8px;">Телефон *</label>
+                        <input type="text" name="phone" value="{{ client.phone|default:'' }}" required
+                               style="width: 100%; padding: 12px; background: var(--bg-surface); border: 1px solid var(--glass-border); border-radius: var(--radius-md); color: var(--text-primary);">
+                    </div>
+                    <div>
+                        <label style="display: block; color: var(--text-muted); font-size: 14px; margin-bottom: 8px;">Email</label>
+                        <input type="email" name="email" value="{{ client.email|default:'' }}"
+                               style="width: 100%; padding: 12px; background: var(--bg-surface); border: 1px solid var(--glass-border); border-radius: var(--radius-md); color: var(--text-primary);">
+                    </div>
+                </div>
+
+                <div>
+                    <label style="display: block; color: var(--text-muted); font-size: 14px; margin-bottom: 8px;">Статус</label>
+                    <select name="status" style="width: 100%; padding: 12px; background: var(--bg-surface); border: 1px solid var(--glass-border); border-radius: var(--radius-md); color: var(--text-primary);">
+                        {% for value, label in client.STATUS_CHOICES %}
+                            <option value="{{ value }}" {% if client.status == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div>
+                    <label style="display: block; color: var(--text-muted); font-size: 14px; margin-bottom: 8px;">Источник</label>
+                    <input type="text" name="source" value="{{ client.source|default:'' }}"
+                           style="width: 100%; padding: 12px; background: var(--bg-surface); border: 1px solid var(--glass-border); border-radius: var(--radius-md); color: var(--text-primary);">
+                </div>
+
+                <div>
+                    <label style="display: block; color: var(--text-muted); font-size: 14px; margin-bottom: 8px;">Теги</label>
+                    <input type="text" name="tags" value="{{ client.tags|default:'' }}" placeholder="Через запятую"
+                           style="width: 100%; padding: 12px; background: var(--bg-surface); border: 1px solid var(--glass-border); border-radius: var(--radius-md); color: var(--text-primary);">
+                </div>
+
+                <div>
+                    <label style="display: block; color: var(--text-muted); font-size: 14px; margin-bottom: 8px;">Заметки</label>
+                    <textarea name="notes" rows="4"
+                              style="width: 100%; padding: 12px; background: var(--bg-surface); border: 1px solid var(--glass-border); border-radius: var(--radius-md); color: var(--text-primary);">{{ client.notes|default:'' }}</textarea>
+                </div>
+
+                <button type="submit" class="btn-primary" style="margin-top: var(--space-md);">
+                    <span class="material-symbols-outlined">{% if action == 'create' %}save{% else %}check{% endif %}</span>
+                    {% if action == 'create' %}Создать{% else %}Сохранить{% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+{% endblock %}

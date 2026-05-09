@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}Настройки - MUSERP{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>
+        <span class="material-symbols-outlined">settings</span>
+        Настройки системы
+    </h1>
+</div>
+
+<div class="settings-grid">
+    <!-- Тарифы -->
+    <a href="{% url 'core:tariffs_list' %}" class="settings-card">
+        <div class="settings-icon" style="background: linear-gradient(135deg, #00dbe9, #00b8c4);">
+            <span class="material-symbols-outlined">price_check</span>
+        </div>
+        <h3>Тарифы</h3>
+        <p>Управление тарифными планами и ценами</p>
+        <div class="settings-stat">{{ tariffs_count }} активных тарифа</div>
+        <span class="material-symbols-outlined">arrow_forward</span>
+    </a>
+
+    <!-- Курсы -->
+    <a href="{% url 'core:courses_list' %}" class="settings-card">
+        <div class="settings-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
+            <span class="material-symbols-outlined">school</span>
+        </div>
+        <h3>Курсы</h3>
+        <p>Настройка курсов и программ обучения</p>
+        <div class="settings-stat">{{ courses_count }} активных курса</div>
+        <span class="material-symbols-outlined">arrow_forward</span>
+    </a>
+
+    <!-- Роли и права -->
+    <a href="{% url 'core:roles_list' %}" class="settings-card" style="opacity: 0.6;">
+        <div class="settings-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+            <span class="material-symbols-outlined">security</span>
+        </div>
+        <h3>Роли и права</h3>
+        <p>Управление доступом пользователей</p>
+        <div class="settings-stat">В разработке</div>
+        <span class="material-symbols-outlined">lock</span>
+    </a>
+
+    <!-- Общие настройки -->
+    <div class="settings-card" style="opacity: 0.6;">
+        <div class="settings-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+            <span class="material-symbols-outlined">tune</span>
+        </div>
+        <h3>Общие настройки</h3>
+        <p>Настройки системы и интеграции</p>
+        <div class="settings-stat">В разработке</div>
+        <span class="material-symbols-outlined">lock</span>
+    </div>
+</div>
+
+<div class="info-box">
+    <h4>💡 Подсказка</h4>
+    <p>
+        <strong>Тарифы</strong> определяют ценовую политику для разных типов занятий:
+    </p>
+    <ul>
+        <li><strong>Individual</strong> - Индивидуальные занятия</li>
+        <li><strong>Group</strong> - Групповые занятия</li>
+        <li><strong>Unlimited</strong> - Безлимитные абонементы</li>
+    </ul>
+    <p>
+        При зачислении клиента на курс выбирается тариф, который автоматически рассчитывает стоимость и создаёт абонемент.
+    </p>
+</div>
+{% endblock %}

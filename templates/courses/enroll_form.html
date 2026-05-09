@@ -1,0 +1,178 @@
+{% extends 'base.html' %}
+
+{% block title %}Записать на курс — MUSERP{% endblock %}
+
+{% block content %}
+    <div class="page-header">
+        <div>
+            <h1>📚 Записать на курс</h1>
+            <p>{{ course.name }} • {{ course.total_lessons }} занятий</p>
+        </div>
+        <div class="page-actions">
+            <a href="{% url 'core:courses_list' %}" class="btn-secondary">
+                <span class="material-symbols-outlined">arrow_back</span>
+                Назад
+            </a>
+        </div>
+    </div>
+
+    <div class="bento-grid">
+        <!-- Информация о курсе -->
+        <div class="glass-card bento-item wide">
+            <div class="section-header">
+                <h3>📋 Информация о курсе</h3>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-sm); margin-bottom: var(--space-md);">
+                <div style="text-align: center; padding: 12px; background: rgba(255, 255, 255, 0.03); border-radius: var(--radius-md);">
+                    <div style="font-size: 12px; color: var(--text-muted);">Всего занятий</div>
+                    <div style="font-size: 16px; font-weight: 600;">{{ course.total_lessons }}</div>
+                </div>
+                <div style="text-align: center; padding: 12px; background: rgba(255, 255, 255, 0.03); border-radius: var(--radius-md);">
+                    <div style="font-size: 12px; color: var(--text-muted);">Практики</div>
+                    <div style="font-size: 16px; font-weight: 600;">{{ course.total_practice_hours|default:"-" }} ч</div>
+                </div>
+                <div style="text-align: center; padding: 12px; background: rgba(255, 255, 255, 0.03); border-radius: var(--radius-md);">
+                    <div style="font-size: 12px; color: var(--text-muted);">Цена</div>
+                    <div style="font-size: 16px; font-weight: 600;">₽ {{ course.actual_price }}</div>
+                </div>
+                <div style="text-align: center; padding: 12px; background: rgba(255, 255, 255, 0.03); border-radius: var(--radius-md);">
+                    <div style="font-size: 12px; color: var(--text-muted);">Свободных мест</div>
+                    <div style="font-size: 16px; font-weight: 600; color: var(--success);">{{ course.available_slots }}</div>
+                </div>
+            </div>
+            {% if course.description %}
+            <div style="margin-top: var(--space-md); padding: 12px; background: rgba(255, 255, 255, 0.03); border-radius: var(--radius-md);">
+                <div style="font-size: 13px; color: var(--text-primary);">{{ course.description }}</div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Поиск клиента -->
+        <div class="glass-card bento-item full">
+            <div class="section-header">
+                <h3>👥 Найти студента</h3>
+            </div>
+            <form method="get" style="display: flex; gap: var(--space-sm);">
+                <input type="text" name="search" placeholder="Поиск по имени или телефону..." value="{{ search_query }}" 
+                       style="flex: 1; padding: 12px; background: var(--bg-surface); border: 1px solid var(--glass-border); 
+                              border-radius: var(--radius-md); color: var(--text-primary);">
+                <button type="submit" class="btn-secondary">
+                    <span class="material-symbols-outlined">search</span>
+                    Найти
+                </button>
+            </form>
+
+            <!-- Список клиентов для выбора -->
+            <div style="margin-top: var(--space-md); max-height: 300px; overflow-y: auto;">
+                {% for client in clients %}
+                <div style="display: flex; align-items: center; gap: var(--space-sm); padding: 12px; 
+                            background: rgba(255, 255, 255, 0.03); border-radius: var(--radius-md); margin-bottom: 8px;
+                            cursor: pointer; transition: all 0.2s;"
+                     onclick="selectClient({{ client.pk }}, '{{ client.last_name }} {{ client.first_name }}')">
+                    <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--secondary)); 
+                                display: flex; align-items: center; justify-content: center; font-weight: 600; color: #000;">
+                        {{ client.last_name|slice:":1" }}{{ client.first_name|slice:":1" }}
+                    </div>
+                    <div style="flex: 1;">
+                        <div style="font-weight: 500;">{{ client.last_name }} {{ client.first_name }}</div>
+                        <div style="font-size: 12px; color: var(--text-muted);">{{ client.phone }}</div>
+                    </div>
+                    <span class="status-badge status-paid">{{ client.get_status_display }}</span>
+                </div>
+                {% empty %}
+                <p style="text-align: center; padding: 20px; color: var(--text-muted);">Клиенты не найдены</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Форма записи -->
+        <div class="glass-card bento-item full">
+            <div class="section-header">
+                <h3>✏️ Данные записи</h3>
+            </div>
+            <form method="post">
+                {% csrf_token %}
+                
+                <input type="hidden" name="client_id" id="client_id" required>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-md); margin-bottom: var(--space-md);">
+                    <div>
+                        <label style="display: block; color: var(--text-muted); font-size: 14px; margin-bottom: 8px;">Выбранный студент *</label>
+                        <input type="text" id="client_display" readonly 
+                               style="width: 100%; padding: 12px; background: var(--bg-surface); border: 1px solid var(--glass-border); 
+                                      border-radius: var(--radius-md); color: var(--text-primary);">
+                        <small style="color: var(--error); display: none;" id="client_error">Выберите студента из списка выше</small>
+                    </div>
+                    
+                    <div>
+                        <label style="display: block; color: var(--text-muted); font-size: 14px; margin-bottom: 8px;">Дата начала занятий *</label>
+                        <input type="date" name="start_date" required value="{{ start_date|default:'now'|date:'Y-m-d' }}"
+                               style="width: 100%; padding: 12px; background: var(--bg-surface); border: 1px solid var(--glass-border); 
+                                      border-radius: var(--radius-md); color: var(--text-primary);">
+                    </div>
+                    
+                    <div>
+                        <label style="display: block; color: var(--text-muted); font-size: 14px; margin-bottom: 8px;">Тип рассрочки</label>
+                        <select name="installment_type" 
+                                style="width: 100%; padding: 12px; background: var(--bg-surface); border: 1px solid var(--glass-border); 
+                                       border-radius: var(--radius-md); color: var(--text-primary);">
+                            <option value="NONE">Разовый платёж</option>
+                            <option value="BANK_2">Банковская рассрочка 2 платежа</option>
+                            <option value="BANK_3">Банковская рассрочка 3 платежа</option>
+                            <option value="BANK_6">Банковская рассрочка 6 платежей</option>
+                            <option value="SCHOOL_2">Рассрочка школы 2 платежа</option>
+                            <option value="SCHOOL_3">Рассрочка школы 3 платежа</option>
+                            <option value="SCHOOL_6">Рассрочка школы 6 платежей</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label style="display: block; color: var(--text-muted); font-size: 14px; margin-bottom: 8px;">Цена при записи (руб)</label>
+                        <input type="number" name="enrolled_price" value="{{ course.actual_price }}" step="100"
+                               style="width: 100%; padding: 12px; background: var(--bg-surface); border: 1px solid var(--glass-border); 
+                                      border-radius: var(--radius-md); color: var(--text-primary);">
+                        <small style="color: var(--text-muted); font-size: 11px;">По умолчанию: ₽ {{ course.actual_price }}</small>
+                    </div>
+                    
+                    <div>
+                        <label style="display: block; color: var(--text-muted); font-size: 14px; margin-bottom: 8px;">Источник записи</label>
+                        <input type="text" name="source" placeholder="Сайт, телефон, рекомендация..."
+                               style="width: 100%; padding: 12px; background: var(--bg-surface); border: 1px solid var(--glass-border); 
+                                      border-radius: var(--radius-md); color: var(--text-primary);">
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: var(--space-md);">
+                    <label style="display: block; color: var(--text-muted); font-size: 14px; margin-bottom: 8px;">Заметки</label>
+                    <textarea name="notes" rows="3"
+                              style="width: 100%; padding: 12px; background: var(--bg-surface); border: 1px solid var(--glass-border); 
+                                     border-radius: var(--radius-md); color: var(--text-primary);"></textarea>
+                </div>
+                
+                <button type="submit" class="btn-primary" style="width: 100%;">
+                    <span class="material-symbols-outlined">person_add</span>
+                    Записать на курс
+                </button>
+            </form>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function selectClient(clientId, clientName) {
+    document.getElementById('client_id').value = clientId;
+    document.getElementById('client_display').value = clientName;
+    document.getElementById('client_error').style.display = 'none';
+}
+
+// Установить сегодняшнюю дату по умолчанию
+document.addEventListener('DOMContentLoaded', function() {
+    const today = new Date().toISOString().split('T')[0];
+    const dateInput = document.querySelector('input[name="start_date"]');
+    if (dateInput && !dateInput.value) {
+        dateInput.value = today;
+    }
+});
+</script>
+{% endblock %}

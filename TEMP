@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Удалить платёж — MUSERP{% endblock %}
+
+{% block content %}
+
+<style>
+    /* Переменные темы (если не подтянулись из base.css) */
+    :root {
+        --primary: #00dbe9;
+        --bg-primary: #131315;
+        --bg-surface: #201f21;
+        --glass-bg: rgba(32, 31, 33, 0.85);
+        --glass-border: rgba(255, 255, 255, 0.08);
+        --text-primary: #e5e1e4;
+        --text-muted: #b9cacb;
+        --error: #ef4444;
+        --error-glow: rgba(239, 68, 68, 0.5);
+        --radius-lg: 16px;
+        --space-sm: 16px;
+        --space-md: 24px;
+        --space-lg: 40px;
+    }
+
+    .glass-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(16px);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--radius-lg);
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Анимация пульсации для иконки предупреждения */
+    .warning-pulse {
+        animation: pulse-red 2s infinite;
+    }
+
+    @keyframes pulse-red {
+        0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+        70% { box-shadow: 0 0 0 20px rgba(239, 68, 68, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+    }
+
+    /* Кнопки */
+    .btn-secondary {
+        padding: 10px 24px;
+        background: transparent;
+        border: 1px solid var(--glass-border);
+        color: var(--text-primary);
+        border-radius: 8px;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.2s;
+        cursor: pointer;
+    }
+    
+    .btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.05);
+        border-color: var(--text-muted);
+    }
+
+    .btn-danger {
+        padding: 10px 24px;
+        background: linear-gradient(135deg, var(--error), #b91c1c);
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.2s;
+        cursor: pointer;
+        box-shadow: 0 0 15px rgba(239, 68, 68, 0.3);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .btn-danger:hover {
+        transform: scale(1.02);
+        box-shadow: 0 0 25px rgba(239, 68, 68, 0.6);
+    }
+
+    /* Типографика */
+    .amount-highlight {
+        font-family: 'Space Grotesk', sans-serif;
+        color: var(--primary);
+        font-size: 1.2em;
+        font-weight: 700;
+    }
+
+    .invoice-number {
+        font-family: 'Space Grotesk', monospace;
+        color: var(--text-primary);
+        background: rgba(255,255,255,0.05);
+        padding: 2px 6px;
+        border-radius: 4px;
+    }
+</style>
+
+<div class="glass-card" style="max-width: 480px; margin: var(--space-lg) auto; text-align: center; padding: var(--space-lg); position: relative; overflow: hidden;">
+    
+    <!-- Декоративный фоновый градиент -->
+    <div style="position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle at center, rgba(239, 68, 68, 0.1) 0%, transparent 60%); pointer-events: none;"></div>
+
+    <div style="position: relative; z-index: 1;">
+        <!-- Иконка -->
+        <div style="margin-bottom: var(--space-md);">
+            <div class="warning-pulse" style="width: 72px; height: 72px; background: rgba(239, 68, 68, 0.1); border: 2px solid var(--error); border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;">
+                <span class="material-symbols-outlined" style="font-size: 40px; color: var(--error);">delete_forever</span>
+            </div>
+        </div>
+        
+        <h2 style="margin-bottom: var(--space-sm); font-family: 'Space Grotesk', sans-serif;">Удалить платёж?</h2>
+        
+        <p style="color: var(--text-muted); margin-bottom: var(--space-md); line-height: 1.6;">
+            Вы уверены, что хотите удалить платёж <span class="invoice-number">{{ payment.invoice_number|default:"—" }}</span> 
+            на сумму <span class="amount-highlight">{{ payment.amount|floatformat:0 }} ₽</span>?
+        </p>
+        
+        <div style="background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 8px; padding: 12px; margin-bottom: var(--space-lg); font-size: 13px; color: #fca5a5;">
+            <span class="material-symbols-outlined" style="font-size: 16px; vertical-align: middle; margin-right: 6px;">info</span>
+            Это действие необратимо и будет записано в лог системы.
+        </div>
+        
+        <form method="post" style="display: flex; gap: var(--space-sm); justify-content: center;">
+            {% csrf_token %}
+            
+            <a href="{% url 'core:payments_list' %}" class="btn-secondary">
+                Отмена
+            </a>
+            
+            <button type="submit" class="btn-danger">
+                <span class="material-symbols-outlined" style="font-size: 20px;">delete</span>
+                Удалить
+            </button>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

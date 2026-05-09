@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{% if action == 'create' %}Новый платёж{% else %}Редактировать платёж{% endif %} — MUSERP{% endblock %}
+
+{% block content %}
+
+<style>
+.form-card {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-md);
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.form-group.full-width {
+    grid-column: span 2;
+}
+
+.form-group label {
+    font-size: 12px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    padding: 10px 12px;
+    background: var(--bg-primary);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    font-size: 14px;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.form-actions {
+    display: flex;
+    gap: var(--space-sm);
+    justify-content: flex-end;
+    margin-top: var(--space-md);
+    padding-top: var(--space-md);
+    border-top: 1px solid var(--glass-border);
+}
+</style>
+
+<div class="page-header">
+    <div>
+        <h1>{% if action == 'create' %}➕ Новый платёж{% else %}✏️ Редактировать платёж{% endif %}</h1>
+        <p>Заполните информацию о платеже</p>
+    </div>
+    <div class="page-actions">
+        <a href="{% url 'core:payments_list' %}" class="btn-secondary">
+            <span class="material-symbols-outlined">arrow_back</span>
+            Назад
+        </a>
+    </div>
+</div>
+
+<div class="glass-card form-card">
+    <form method="post">
+        {% csrf_token %}
+        
+        <div class="form-grid">
+            <div class="form-group full-width">
+                <label>Клиент *</label>
+                <select name="client_id" required {% if action == 'update' %}disabled{% endif %}>
+                    <option value="">Выберите клиента</option>
+                    {% if action == 'update' %}
+                        <option value="{{ payment.client.pk }}" selected>
+                            {{ payment.client.last_name }} {{ payment.client.first_name }}
+                        </option>
+                    {% else %}
+                        {% for client in clients %}
+                            <option value="{{ client.pk }}">{{ client.last_name }} {{ client.first_name }}</option>
+                        {% endfor %}
+                    {% endif %}
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Сумма (руб) *</label>
+                <input type="number" name="amount" step="0.01" min="0" 
+                       value="{% if action == 'update' %}{{ payment.amount }}{% endif %}" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Способ оплаты</label>
+                <select name="method_id">
+                    <option value="">Не указано</option>
+                    {% for method in methods %}
+                        <option value="{{ method.pk }}" {% if action == 'update' and payment.method_id == method.pk %}selected{% endif %}>
+                            {{ method.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Тип оплаты</label>
+                <select name="payment_type">
+                    {% for value, label in payment_types %}
+                        <option value="{{ value }}" {% if action == 'update' and payment.payment_type == value %}selected{% elif value == 'ONCE' and action == 'create' %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Срок оплаты</label>
+                <input type="date" name="due_date" 
+                       value="{% if action == 'update' and payment.due_date %}{{ payment.due_date|date:'Y-m-d' }}{% endif %}">
+            </div>
+            
+            {% if action == 'update' %}
+            <div class="form-group">
+                <label>Статус</label>
+                <select name="status">
+                    {% for value, label in statuses %}
+                        <option value="{{ value }}" {% if payment.status == value %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% endif %}
+            
+            <div class="form-group full-width">
+                <label>Описание</label>
+                <textarea name="description">{% if action == 'update' %}{{ payment.description }}{% endif %}</textarea>
+            </div>
+        </div>
+        
+        <div class="form-actions">
+            <a href="{% url 'core:payments_list' %}" class="btn-secondary">
+                Отмена
+            </a>
+            <button type="submit" class="btn-primary">
+                {% if action == 'create' %}Создать{% else %}Сохранить{% endif %}
+            </button>
+        </div>
+    </form>
+</div>
+
+{% endblock %}

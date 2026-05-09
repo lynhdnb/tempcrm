@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+
+{% block title %}Курсы — MUSERP{% endblock %}
+
+{% block content %}
+    <div class="page-header">
+        <div>
+            <h1>📚 Курсы обучения</h1>
+            <p>Управление учебными программами</p>
+        </div>
+        <div class="page-actions">
+            <a href="{% url 'core:course_create' %}" class="btn-secondary">
+                <span class="material-symbols-outlined">add</span>
+                Создать курс
+            </a>
+        </div>
+    </div>
+
+    <!-- Фильтры -->
+    <div class="glass-card" style="padding: var(--space-md); margin-bottom: var(--space-lg);">
+        <form method="get" style="display: flex; gap: var(--space-sm); align-items: center;">
+            <select name="category" class="btn-secondary" style="width: auto;">
+                <option value="">Все категории</option>
+                {% for cat in categories %}
+                    <option value="{{ cat.id }}" {% if current_category == cat.id|stringformat:"s" %}selected{% endif %}>{{ cat.name }}</option>
+                {% endfor %}
+            </select>
+            <input type="text" name="search" placeholder="Поиск курсов..." value="{{ search_query }}" 
+                   style="padding: 10px; background: var(--bg-surface); border: 1px solid var(--glass-border); 
+                          border-radius: var(--radius-md); color: var(--text-primary); width: 250px;">
+            <button type="submit" class="btn-secondary">
+                <span class="material-symbols-outlined">search</span>
+                Найти
+            </button>
+        </form>
+    </div>
+
+    <!-- Список курсов -->
+    <div class="bento-grid">
+        {% for course in courses %}
+        <div class="glass-card bento-item" style="grid-column: span 12; padding: var(--space-md);">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div style="flex: 1;">
+                    <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 8px;">
+                        <h3 style="margin: 0; font-size: 18px;">{{ course.name }}</h3>
+                        {% if course.is_popular %}
+                            <span class="status-badge status-pending" style="font-size: 10px;">🔥 Популярный</span>
+                        {% endif %}
+                    </div>
+                    <p style="color: var(--text-muted); font-size: 14px; margin: 4px 0;">
+                        {{ course.description|truncatechars:150 }}
+                    </p>
+                    <div style="display: flex; gap: 12px; margin-top: 12px; font-size: 13px;">
+                        {% if course.category %}
+                            <span>📁 {{ course.category.name }}</span>
+                        {% endif %}
+                        <span>📚 {{ course.total_lessons }} занятий</span>
+                        <span>⏱️ {{ course.lesson_duration }} мин</span>
+                        <span>⏳ {{ course.get_duration_display }}</span>
+                        {% if course.promo_price %}
+                            <span style="text-decoration: line-through; color: var(--text-muted);">₽ {{ course.base_price }}</span>
+                            <span style="color: var(--success); font-weight: bold;">₽ {{ course.promo_price }}</span>
+                        {% else %}
+                            <span>💰 ₽ {{ course.base_price }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <a href="{% url 'core:course_update' course.pk %}" class="btn-secondary" style="padding: 8px 12px; font-size: 12px;">
+                        <span class="material-symbols-outlined">edit</span>
+                    </a>
+                    <a href="{% url 'core:course_detail' course.pk %}" class="btn-secondary">
+                        <span class="material-symbols-outlined">visibility</span>
+                        Подробнее
+                    </a>
+                    <a href="{% url 'core:enroll_client' course.pk %}" class="btn-primary" style="padding: 8px 12px; font-size: 12px;">
+                        <span class="material-symbols-outlined">person_add</span>
+                        Записать
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div style="grid-column: span 12; text-align: center; padding: 60px; color: var(--text-muted);">
+            <span class="material-symbols-outlined" style="font-size: 48px; color: var(--primary);">school</span>
+            <p style="margin-top: var(--space-sm); font-size: 16px;">Курсы отсутствуют. <a href="{% url 'core:course_create' %}" style="color: var(--primary);">Создайте первый курс</a></p>
+        </div>
+        {% endfor %}
+    </div>
+{% endblock %}

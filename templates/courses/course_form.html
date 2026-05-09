@@ -1,0 +1,172 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if action == 'update' %}Редактировать курс{% else %}Создать курс{% endif %} — MUSERP{% endblock %}
+
+{% block content %}
+    <div class="page-header">
+        <div>
+            <h1>{% if action == 'update' %}✏️ Редактировать курс{% else %}➕ Создать новый курс{% endif %}</h1>
+            <p>{% if action == 'update' %}Изменение учебной программы{% else %}Добавление учебной программы в систему{% endif %}</p>
+        </div>
+        <div class="page-actions">
+            <a href="{% url 'core:courses_list' %}" class="btn-secondary">
+                <span class="material-symbols-outlined">arrow_back</span>
+                Назад
+            </a>
+        </div>
+    </div>
+
+    <div class="glass-card" style="padding: var(--space-md); max-width: 800px;">
+        <form method="post">
+            {% csrf_token %}
+            
+            <div style="display: grid; gap: var(--space-md);">
+                <!-- Основная информация -->
+                <div style="border-bottom: 1px solid var(--glass-border); padding-bottom: var(--space-md);">
+                    <h3 style="margin-bottom: var(--space-sm);">📋 Основная информация</h3>
+                    
+                    <div style="display: grid; gap: var(--space-md);">
+                        <div>
+                            <label style="display: block; color: var(--text-muted); font-size: 14px; margin-bottom: 8px;">Название курса *</label>
+                            <input type="text" name="name" value="{{ course.name|default:'' }}" required placeholder="Например: DJ Basics, Продвинутый миксинг"
+                                   style="width: 100%; padding: 12px; background: var(--bg-surface); border: 1px solid var(--glass-border); border-radius: var(--radius-md); color: var(--text-primary);">
+                            <small style="color: var(--text-muted); font-size: 11px; margin-top: 4px; display: block;">Краткое название курса для списка и карточки</small>
+                        </div>
+
+                        <div>
+                            <label style="display: block; color: var(--text-muted); font-size: 14px; margin-bottom: 8px;">Слаг (URL) *</label>
+                            <input type="text" name="slug" value="{{ course.slug|default:'' }}" required placeholder="dj-basics"
+                                   style="width: 100%; padding: 12px; background: var(--bg-surface); border: 1px solid var(--glass-border); border-radius: var(--radius-md); color: var(--text-primary);">
+                            <small style="color: var(--text-muted); font-size: 11px; margin-top: 4px; display: block;">URL-адрес курса на латинице через дефис</small>
+                        </div>
+
+                        <div>
+                            <label style="display: block; color: var(--text-muted); font-size: 14px; margin-bottom: 8px;">Категория</label>
+                            <select name="category" 
+                                    style="width: 100%; padding: 12px; background: var(--bg-surface); border: 1px solid var(--glass-border); border-radius: var(--radius-md); color: var(--text-primary);">
+                                <option value="">Не указана</option>
+                                {% for cat in categories %}
+                                    <option value="{{ cat.id }}" {% if course.category and course.category.id == cat.id %}selected{% endif %}>{{ cat.name }}</option>
+                                {% endfor %}
+                            </select>
+                            <small style="color: var(--text-muted); font-size: 11px; margin-top: 4px; display: block;">Раздел, к которому относится курс (например: DJ-инг, Звукозапись, Мастер-классы)</small>
+                        </div>
+
+                        <div>
+                            <label style="display: block; color: var(--text-muted); font-size: 14px; margin-bottom: 8px;">Краткое описание</label>
+                            <textarea name="description" rows="2" placeholder="Краткое описание курса для списка..."
+                                      style="width: 100%; padding: 12px; background: var(--bg-surface); border: 1px solid var(--glass-border); border-radius: var(--radius-md); color: var(--text-primary);">{{ course.description|default:'' }}</textarea>
+                            <small style="color: var(--text-muted); font-size: 11px; margin-top: 4px; display: block;">1-2 предложения для карточки курса</small>
+                        </div>
+
+                        <div>
+                            <label style="display: block; color: var(--text-muted); font-size: 14px; margin-bottom: 8px;">Полное описание</label>
+                            <textarea name="full_description" rows="4" placeholder="Подробное описание для договора и прайс-листа..."
+                                      style="width: 100%; padding: 12px; background: var(--bg-surface); border: 1px solid var(--glass-border); border-radius: var(--radius-md); color: var(--text-primary);">{{ course.full_description|default:'' }}</textarea>
+                            <small style="color: var(--text-muted); font-size: 11px; margin-top: 4px; display: block;">Подробное описание для договора, прайс-листа и детальной страницы</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Программа и структура -->
+                <div style="border-bottom: 1px solid var(--glass-border); padding-bottom: var(--space-md);">
+                    <h3 style="margin-bottom: var(--space-sm);">📖 Программа и структура</h3>
+                    
+                    <div style="display: grid; gap: var(--space-md);">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-md);">
+                            <div>
+                                <label style="display: block; color: var(--text-muted); font-size: 14px; margin-bottom: 8px;">Всего занятий *</label>
+                                <input type="number" name="total_lessons" value="{{ course.total_lessons|default:12 }}" min="1" required
+                                       style="width: 100%; padding: 12px; background: var(--bg-surface); border: 1px solid var(--glass-border); border-radius: var(--radius-md); color: var(--text-primary);">
+                                <small style="color: var(--text-muted); font-size: 11px; margin-top: 4px; display: block;">Общее количество (с преподом + самостоятельная практика)</small>
+                            </div>
+                            <div>
+                                <label style="display: block; color: var(--text-muted); font-size: 14px; margin-bottom: 8px;">Длительность занятия (мин) *</label>
+                                <input type="number" name="lesson_duration" value="{{ course.lesson_duration|default:60 }}" min="30" max="180" step="15" required
+                                       style="width: 100%; padding: 12px; background: var(--bg-surface); border: 1px solid var(--glass-border); border-radius: var(--radius-md); color: var(--text-primary);">
+                                <small style="color: var(--text-muted); font-size: 11px; margin-top: 4px; display: block;">Стандартная длительность (45, 60, 90 минут)</small>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label style="display: block; color: var(--text-muted); font-size: 14px; margin-bottom: 8px;">Длительность курса</label>
+                            <select name="duration"
+                                    style="width: 100%; padding: 12px; background: var(--bg-surface); border: 1px solid var(--glass-border); border-radius: var(--radius-md); color: var(--text-primary);">
+                                {% for value, label in durations %}
+                                    <option value="{{ value }}" {% if course.duration == value %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                            <small style="color: var(--text-muted); font-size: 11px; margin-top: 4px; display: block;">Рекомендуемая длительность прохождения курса</small>
+                        </div>
+
+                        <div>
+                            <label style="display: block; color: var(--text-muted); font-size: 14px; margin-bottom: 8px;">Программа курса *</label>
+                            <textarea name="curriculum" rows="5" required placeholder="Перечень тем/модулей через запятую или список..."
+                                      style="width: 100%; padding: 12px; background: var(--bg-surface); border: 1px solid var(--glass-border); border-radius: var(--radius-md); color: var(--text-primary);">{{ course.curriculum|default:'' }}</textarea>
+                            <small style="color: var(--text-muted); font-size: 11px; margin-top: 4px; display: block;">Что будет изучать студент. Пример: Основы миксинга, Эквалайзер, Эффекты, Работа с семплами</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Стоимость -->
+                <div style="border-bottom: 1px solid var(--glass-border); padding-bottom: var(--space-md);">
+                    <h3 style="margin-bottom: var(--space-sm);">💰 Стоимость</h3>
+                    
+                    <div style="display: grid; gap: var(--space-md);">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-md);">
+                            <div>
+                                <label style="display: block; color: var(--text-muted); font-size: 14px; margin-bottom: 8px;">Базовая цена курса (руб) *</label>
+                                <input type="number" name="base_price" value="{{ course.base_price|default:'' }}" required step="100" min="0" placeholder="Полная стоимость по договору"
+                                       style="width: 100%; padding: 12px; background: var(--bg-surface); border: 1px solid var(--glass-border); border-radius: var(--radius-md); color: var(--text-primary);">
+                                <small style="color: var(--text-muted); font-size: 11px; margin-top: 4px; display: block;">Полная стоимость курса для договора и прайс-листа</small>
+                            </div>
+                            <div>
+                                <label style="display: block; color: var(--text-muted); font-size: 14px; margin-bottom: 8px;">Акционная цена (руб)</label>
+                                <input type="number" name="promo_price" value="{{ course.promo_price|default:'' }}" step="100" min="0" placeholder="Цена со скидкой"
+                                       style="width: 100%; padding: 12px; background: var(--bg-surface); border: 1px solid var(--glass-border); border-radius: var(--radius-md); color: var(--text-primary);">
+                                <small style="color: var(--text-muted); font-size: 11px; margin-top: 4px; display: block;">Фактическая цена к оплате. Если не указано — используется базовая</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ограничения и материалы -->
+                <div style="border-bottom: 1px solid var(--glass-border); padding-bottom: var(--space-md);">
+                    <h3 style="margin-bottom: var(--space-sm);">⚙️ Материалы и настройки</h3>
+                    
+                    <div style="display: grid; gap: var(--space-md);">
+                        <div>
+                            <label style="display: block; color: var(--text-muted); font-size: 14px; margin-bottom: 8px;">Ссылка на материалы</label>
+                            <input type="url" name="materials_url" value="{{ course.materials_url|default:'' }}" placeholder="https://drive.google.com/..."
+                                   style="width: 100%; padding: 12px; background: var(--bg-surface); border: 1px solid var(--glass-border); border-radius: var(--radius-md); color: var(--text-primary);">
+                            <small style="color: var(--text-muted); font-size: 11px; margin-top: 4px; display: block;">Google Drive, Dropbox или другая ссылка на учебные материалы</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Опции -->
+                <div style="display: flex; gap: var(--space-md);">
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <input type="checkbox" name="is_active" {% if action == 'create' or course.is_active %}checked{% endif %}>
+                        <span style="color: var(--text-primary);">Курс активен (доступен для записи)</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <input type="checkbox" name="is_popular" {% if course.is_popular %}checked{% endif %}>
+                        <span style="color: var(--text-primary);">Популярный курс (показывать в топе)</span>
+                    </label>
+                </div>
+
+                <!-- Кнопки -->
+                <div style="display: flex; gap: var(--space-md); margin-top: var(--space-md);">
+                    <button type="submit" class="btn-primary" style="flex: 1;">
+                        <span class="material-symbols-outlined">{% if action == 'update' %}edit{% else %}save{% endif %}</span>
+                        {% if action == 'update' %}Сохранить изменения{% else %}Создать курс{% endif %}
+                    </button>
+                    <a href="{% url 'core:courses_list' %}" class="btn-secondary">
+                        Отмена
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+{% endblock %}

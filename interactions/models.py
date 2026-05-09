@@ -66,3 +66,54 @@ class Comment(models.Model):
 
     def __str__(self):
         return f"Comment by {self.user.username} on {self.interaction}"
+
+
+class Notification(models.Model):
+    """Уведомления для клиентов и сотрудников"""
+    TYPE_CHOICES = [
+        ('LESSON_REMINDER_24H', 'Напоминание о занятии за 24 часа'),
+        ('LESSON_REMINDER_3H', 'Напоминание о занятии за 3 часа'),
+        ('PAYMENT_REMINDER', 'Напоминание об оплате'),
+        ('COURSE_COMPLETED', 'Курс завершён'),
+        ('CUSTOM', 'Произвольное уведомление'),
+    ]
+    
+    STATUS_CHOICES = [
+        ('PENDING', 'Ожидает отправки'),
+        ('SENT', 'Отправлено'),
+        ('FAILED', 'Ошибка отправки'),
+    ]
+    
+    SEND_METHOD_CHOICES = [
+        ('EMAIL', 'Email'),
+        ('SMS', 'SMS'),
+        ('PUSH', 'Push-уведомление'),
+        ('WHATSAPP', 'WhatsApp'),
+    ]
+    
+    client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='notifications', verbose_name="Клиент")
+    lesson = models.ForeignKey('lessons.Lesson', on_delete=models.SET_NULL, null=True, blank=True, related_name='notifications', verbose_name="Занятие")
+    enrollment = models.ForeignKey('core.Enrollment', on_delete=models.SET_NULL, null=True, blank=True, related_name='notifications', verbose_name="Запись на курс")
+    
+    notification_type = models.CharField(max_length=50, choices=TYPE_CHOICES)
+    title = models.CharField("Заголовок", max_length=200)
+    message = models.TextField("Текст")
+    
+    send_method = models.CharField("Способ", max_length=20, choices=SEND_METHOD_CHOICES, default='EMAIL')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING')
+    sent_at = models.DateTimeField(null=True, blank=True)
+    
+    scheduled_for = models.DateTimeField("Планируемая отправка", null=True, blank=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        verbose_name = "Уведомление"
+        verbose_name_plural = "Уведомления"
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['status', 'scheduled_for']),
+        ]
+
+    def __str__(self):
+        return f"{self.get_notification_type_display()} - {self.client}"

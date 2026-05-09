@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+
+{% block title %}Личный кабинет — MUSERP{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>👋 Привет! Добро пожаловать в личный кабинет</h1>
+        <p>Твои курсы, занятия и прогресс в одном месте</p>
+    </div>
+</div>
+
+<div class="bento-grid">
+    <!-- Активные курсы -->
+    <div class="glass-card bento-item wide">
+        <div class="section-header">
+            <h3>📚 Активные курсы</h3>
+        </div>
+        <div style="display: flex; gap: var(--space-md);">
+            {% for enrollment in enrollments %}
+            <div style="flex: 1; padding: 16px; background: rgba(255, 255, 255, 0.03); border-radius: var(--radius-md);">
+                <div style="font-weight: 600; margin-bottom: 8px;">{{ enrollment.course.name }}</div>
+                <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">
+                    {{ enrollment.get_status_display }}
+                </div>
+                <div style="font-size: 12px; color: var(--text-muted);">
+                    Прогресс: {{ enrollment.progress_percentage }}%
+                </div>
+                <div style="margin-top: 8px;">
+                    <div style="height: 6px; background: rgba(255, 255, 255, 0.1); border-radius: 3px; overflow: hidden;">
+                        <div style="height: 100%; width: {{ enrollment.progress_percentage }}%; background: linear-gradient(90deg, var(--primary), var(--secondary));"></div>
+                    </div>
+                </div>
+                <a href="{% url 'core:student_progress' enrollment.id %}" style="display: block; margin-top: 12px; color: var(--primary); font-size: 13px;">
+                    Подробнее →
+                </a>
+            </div>
+            {% empty %}
+            <div style="flex: 1; padding: 20px; text-align: center; color: var(--text-muted);">
+                У тебя пока нет активных курсов
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Предстоящие занятия -->
+    <div class="glass-card bento-item full">
+        <div class="section-header">
+            <h3>📅 Предстоящие занятия</h3>
+            <a href="{% url 'core:student_lessons' %}" style="font-size: 13px; color: var(--primary);">Все занятия →</a>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: var(--space-sm);">
+            {% for lesson in upcoming_lessons %}
+            <div style="display: flex; align-items: center; gap: var(--space-md); padding: 12px; background: rgba(255, 255, 255, 0.03); border-radius: var(--radius-md);">
+                <div style="width: 48px; height: 48px; border-radius: var(--radius-md); background: linear-gradient(135deg, var(--primary), var(--secondary)); display: flex; align-items: center; justify-content: center; font-weight: 600; color: #000;">
+                    {{ lesson.start_time|date:"H:i" }}
+                </div>
+                <div style="flex: 1;">
+                    <div style="font-weight: 500;">{{ lesson.lesson_type.name }}</div>
+                    <div style="font-size: 12px; color: var(--text-muted);">
+                        {% if lesson.teacher %}С преподавателем: {{ lesson.teacher.user.get_full_name|default:lesson.teacher.user.username }}{% else %}Самостоятельная практика{% endif %}
+                    </div>
+                </div>
+                <div style="font-size: 12px; color: var(--text-muted);">
+                    {{ lesson.start_time|date:"d M" }}
+                </div>
+            </div>
+            {% empty %}
+            <div style="text-align: center; padding: 20px; color: var(--text-muted);">
+                Предстоящих занятий нет
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Последние занятия -->
+    <div class="glass-card bento-item full">
+        <div class="section-header">
+            <h3>✅ Последние занятия</h3>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: var(--space-sm);">
+            {% for lesson in recent_lessons %}
+            <div style="display: flex; align-items: center; gap: var(--space-md); padding: 12px; background: rgba(255, 255, 255, 0.03); border-radius: var(--radius-md);">
+                <div style="width: 48px; height: 48px; border-radius: var(--radius-md); background: var(--success); display: flex; align-items: center; justify-content: center; color: #fff;">
+                    ✓
+                </div>
+                <div style="flex: 1;">
+                    <div style="font-weight: 500;">{{ lesson.lesson_type.name }}</div>
+                    <div style="font-size: 12px; color: var(--text-muted);">
+                        {{ lesson.start_time|date:"d E H:i" }}
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div style="text-align: center; padding: 20px; color: var(--text-muted);">
+                Ты пока не провёл занятий
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Платежи -->
+    <div class="glass-card bento-item tall">
+        <div class="section-header">
+            <h3>💳 Платежи</h3>
+            <a href="{% url 'core:student_payments' %}" style="font-size: 13px; color: var(--primary);">Все →</a>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: var(--space-sm);">
+            {% for payment in unpaid_payments %}
+            <div style="padding: 12px; background: rgba(255, 152, 0, 0.1); border-left: 3px solid var(--warning); border-radius: var(--radius-md);">
+                <div style="font-weight: 500; margin-bottom: 4px;">Платёж {{ payment.installment_number|default:"1" }}/{{ payment.total_installments|default:"1" }}</div>
+                <div style="font-size: 13px; color: var(--text-muted);">
+                    {{ payment.amount }} руб. • Срок: {{ payment.due_date|date:"d E Y" }}
+                </div>
+            </div>
+            {% empty %}
+            <div style="text-align: center; padding: 20px; color: var(--text-muted);">
+                Нет неоплаченных платежей
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

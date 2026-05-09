@@ -1,0 +1,168 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ course.name }} — MUSERP{% endblock %}
+
+{% block content %}
+    <div class="page-header">
+        <div>
+            <h1>📚 {{ course.name }}</h1>
+            <p>{{ course.get_duration_display }} • {{ course.total_lessons }} занятий</p>
+        </div>
+        <div class="page-actions">
+            <a href="{% url 'core:course_update' course.pk %}" class="btn-secondary">
+                <span class="material-symbols-outlined">edit</span>
+                Редактировать
+            </a>
+            <a href="{% url 'core:enroll_client' course.pk %}" class="btn-primary">
+                <span class="material-symbols-outlined">person_add</span>
+                Записать студента
+            </a>
+            <a href="{% url 'core:courses_list' %}" class="btn-secondary">
+                <span class="material-symbols-outlined">arrow_back</span>
+                Назад
+            </a>
+        </div>
+    </div>
+
+    <div class="bento-grid">
+        <!-- Основная информация -->
+        <div class="glass-card bento-item wide">
+            <div class="section-header">
+                <h3>📋 Информация о курсе</h3>
+            </div>
+            <table class="data-table">
+                <tbody>
+                    <tr>
+                        <td style="color: var(--text-muted); width: 200px;">Категория</td>
+                        <td>{{ course.category.name|default:"Не указана" }}</td>
+                    </tr>
+                    <tr>
+                        <td style="color: var(--text-muted);">Длительность курса</td>
+                        <td>{{ course.get_duration_display }}</td>
+                    </tr>
+                    <tr>
+                        <td style="color: var(--text-muted);">Всего занятий</td>
+                        <td>{{ course.total_lessons }} занятий</td>
+                    </tr>
+                    <tr>
+                        <td style="color: var(--text-muted);">Длительность занятия</td>
+                        <td>{{ course.lesson_duration }} минут</td>
+                    </tr>
+                    {% if course.promo_price %}
+                    <tr>
+                        <td style="color: var(--text-muted);">Базовая цена</td>
+                        <td style="text-decoration: line-through; color: var(--text-muted);">₽ {{ course.base_price }}</td>
+                    </tr>
+                    <tr>
+                        <td style="color: var(--text-muted);">Акционная цена</td>
+                        <td style="color: var(--success); font-weight: 600;">₽ {{ course.promo_price }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td style="color: var(--text-muted);">Цена курса</td>
+                        <td>₽ {{ course.base_price }}</td>
+                    </tr>
+                    {% endif %}
+                    <tr>
+                        <td style="color: var(--text-muted);">Статус</td>
+                        <td>{{ course.get_status_display }}</td>
+                    </tr>
+                        <td style="color: var(--text-muted);">Свободных мест</td>
+                        <td style="color: var(--success); font-weight: 600;">{{ available_slots }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- KPI карточки -->
+        <div class="glass-card bento-item narrow">
+            <div class="kpi-card">
+                <div class="kpi-label">Активных студентов</div>
+                <div class="kpi-value">{{ active_students }}</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Свободных мест</div>
+                <div class="kpi-value">{{ available_slots }}</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Цена за курс</div>
+                <div class="kpi-value">₽ {{ course.actual_price }}</div>
+            </div>
+        </div>
+
+        <!-- Программа курса -->
+        <div class="glass-card bento-item full">
+            <div class="section-header">
+                <h3>📖 Программа курса</h3>
+            </div>
+            <div style="padding: var(--space-sm); color: var(--text-primary);">
+                {{ course.curriculum|linebreaksbr|default:"Программа не заполнена" }}
+            </div>
+        </div>
+
+        <!-- Полное описание -->
+        {% if course.full_description %}
+        <div class="glass-card bento-item full">
+            <div class="section-header">
+                <h3>📄 Полное описание</h3>
+            </div>
+            <div style="padding: var(--space-sm); color: var(--text-primary);">
+                {{ course.full_description|linebreaksbr }}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Материалы -->
+        {% if course.materials_url %}
+        <div class="glass-card bento-item wide">
+            <div class="section-header">
+                <h3>📎 Учебные материалы</h3>
+            </div>
+            <div style="padding: var(--space-sm);">
+                <a href="{{ course.materials_url }}" target="_blank" style="color: var(--primary);">
+                    <span class="material-symbols-outlined" style="vertical-align: middle;">open_in_new</span>
+                    {{ course.materials_url }}
+                </a>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Текущие студенты -->
+        <div class="glass-card bento-item wide">
+            <div class="section-header">
+                <h3>👥 Активные студенты ({{ active_students }})</h3>
+                <a href="{% url 'core:enrollments_list' %}?status=ACTIVE">Все →</a>
+            </div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Студент</th>
+                        <th>Дата записи</th>
+                        <th>Прогресс</th>
+                        <th>Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for enrollment in enrollments %}
+                    <tr>
+                        <td>{{ enrollment.client.last_name }} {{ enrollment.client.first_name|slice:":1" }}.</td>
+                        <td>{{ enrollment.created_at|date:"d.m.Y" }}</td>
+                        <td>{{ enrollment.progress_percentage }}%</td>
+                        <td>
+                            <a href="{% url 'core:enrollment_detail' enrollment.pk %}" style="color: var(--primary);">
+                                <span class="material-symbols-outlined" style="font-size: 18px;">visibility</span>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" style="text-align: center; padding: 20px; color: var(--text-muted);">
+                            Студентов пока нет
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}

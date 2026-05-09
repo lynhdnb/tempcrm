@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+
+{% block title %}Задачи — MUSERP{% endblock %}
+
+{% block content %}
+    <div class="page-header">
+        <div>
+            <h1>✅ Задачи</h1>
+            <p>Управление задачами и поручениями</p>
+        </div>
+    </div>
+
+    <!-- Фильтры -->
+    <div class="glass-card" style="padding: var(--space-md); margin-bottom: var(--space-lg);">
+        <form method="get" style="display: flex; gap: var(--space-sm); align-items: center;">
+            <select name="status" class="btn-secondary" style="width: auto;">
+                <option value="">Все статусы</option>
+                {% for value, label in statuses %}
+                    <option value="{{ value }}" {% if current_status == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+            <select name="priority" class="btn-secondary" style="width: auto;">
+                <option value="">Все приоритеты</option>
+                {% for value, label in priorities %}
+                    <option value="{{ value }}" {% if current_priority == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="btn-secondary">
+                <span class="material-symbols-outlined">search</span>
+                Применить
+            </button>
+        </form>
+    </div>
+
+    <!-- Список задач -->
+    <div class="glass-card" style="padding: var(--space-md);">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Приоритет</th>
+                    <th>Название</th>
+                    <th>Клиент</th>
+                    <th>Исполнитель</th>
+                    <th>Срок</th>
+                    <th>Статус</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for task in tasks %}
+                <tr>
+                    <td>
+                        {% if task.priority == 'HIGH' %}
+                            <span class="status-badge status-overdue">🔥 Высокий</span>
+                        {% elif task.priority == 'MEDIUM' %}
+                            <span class="status-badge status-pending">⚡ Средний</span>
+                        {% else %}
+                            <span class="status-badge">{{ task.get_priority_display }}</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ task.title }}</td>
+                    <td>{{ task.client|default:"-" }}</td>
+                    <td>{{ task.assigned_to.get_full_name|default:"-" }}</td>
+                    <td {% if task.due_date < today and task.status != 'DONE' %}style="color: var(--error);" {% endif %}>
+                        {{ task.due_date|date:"d.m.Y" }}
+                    </td>
+                    <td>
+                        {% if task.status == 'DONE' %}
+                            <span class="status-badge status-paid">✓ Выполнено</span>
+                        {% elif task.status == 'TODO' %}
+                            <span class="status-badge">{{ task.get_status_display }}</span>
+                        {% elif task.status == 'IN_PROGRESS' %}
+                            <span class="status-badge status-pending">⏳ В работе</span>
+                        {% else %}
+                            <span class="status-badge status-overdue">🔄 На проверке</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" style="text-align: center; padding: 40px; color: var(--text-muted);">
+                        Задачи отсутствуют
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

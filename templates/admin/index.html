@@ -1,0 +1,208 @@
+{% extends "admin/index.html" %}
+{% load i18n %}
+
+{% block content %}
+<div id="content-main">
+    
+    <!-- ГРУППА 1: КЛИЕНТЫ И СТУДЕНТЫ -->
+    <div class="module">
+        <h2>👥 Клиенты и студенты</h2>
+        <table>
+            <caption>
+                <a href="{% url 'admin:core_client_changelist' %}">Клиенты</a>
+            </caption>
+            <tr>
+                <th scope="row"><a href="{% url 'admin:core_client_changelist' %}">Список клиентов</a></th>
+                <td><a href="{% url 'admin:core_client_add' %}" class="addlink">Добавить</a></td>
+            </tr>
+            <tr>
+                <th scope="row"><a href="{% url 'admin:core_contactperson_changelist' %}">Контактные лица</a></th>
+                <td><a href="{% url 'admin:core_contactperson_add' %}" class="addlink">Добавить</a></td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- ГРУППА 2: КУРСЫ И ОБУЧЕНИЕ -->
+    <div class="module">
+        <h2>📚 Курсы и обучение</h2>
+        <table>
+            <caption>
+                <a href="{% url 'admin:core_course_changelist' %}">Курсы</a>
+            </caption>
+            <tr>
+                <th scope="row"><a href="{% url 'admin:core_course_changelist' %}">Список курсов</a></th>
+                <td><a href="{% url 'admin:core_course_add' %}" class="addlink">Добавить</a></td>
+            </tr>
+            <tr>
+                <th scope="row"><a href="{% url 'admin:core_enrollment_changelist' %}">Записи на курсы</a></th>
+                <td><a href="{% url 'admin:core_enrollment_add' %}" class="addlink">Добавить</a></td>
+            </tr>
+            <tr>
+                <th scope="row"><a href="{% url 'admin:core_coursecategory_changelist' %}">Категории курсов</a></th>
+                <td><a href="{% url 'admin:core_coursecategory_add' %}" class="addlink">Добавить</a></td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- ГРУППА 3: АУДИТОРИИ И РЕСУРСЫ -->
+    <div class="module">
+        <h2>🏢 Аудитории и ресурсы</h2>
+        <table>
+            <caption>
+                <a href="{% url 'admin:core_room_changelist' %}">Аудитории</a>
+            </caption>
+            <tr>
+                <th scope="row"><a href="{% url 'admin:core_room_changelist' %}">Список аудиторий</a></th>
+                <td><a href="{% url 'admin:core_room_add' %}" class="addlink">Добавить</a></td>
+            </tr>
+            <tr>
+                <th scope="row"><a href="{% url 'admin:core_resource_changelist' %}">Оборудование и ресурсы</a></th>
+                <td><a href="{% url 'admin:core_resource_add' %}" class="addlink">Добавить</a></td>
+            </tr>
+            <tr>
+                <th scope="row"><a href="{% url 'admin:core_roomresource_changelist' %}">Ресурсы в аудиториях</a></th>
+                <td><a href="{% url 'admin:core_roomresource_add' %}" class="addlink">Добавить</a></td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- ГРУППА 3: ПРЕПОДАВАТЕЛИ И СОТРУДНИКИ -->
+    <div class="module">
+        <h2>👨‍🏫 Преподаватели и сотрудники</h2>
+        <table>
+            <caption>
+                <a href="{% url 'admin:core_employeeprofile_changelist' %}">Профили сотрудников</a>
+            </caption>
+            <tr>
+                <th scope="row"><a href="{% url 'admin:core_employeeprofile_changelist' %}">Список сотрудников</a></th>
+                <td><a href="{% url 'admin:core_employeeprofile_add' %}" class="addlink">Добавить</a></td>
+            </tr>
+            <tr>
+                <th scope="row"><a href="{% url 'admin:core_role_changelist' %}">Роли</a></th>
+                <td><a href="{% url 'admin:core_role_add' %}" class="addlink">Добавить</a></td>
+            </tr>
+            <tr>
+                <th scope="row"><a href="{% url 'admin:core_roleassignment_changelist' %}">Назначения ролей</a></th>
+                <td><a href="{% url 'admin:core_roleassignment_add' %}" class="addlink">Добавить</a></td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- ГРУППА 4: ЗАНИЯ И РАСПИСАНИЕ -->
+    <div class="module">
+        <h2>📅 Занятия и расписание</h2>
+        <table>
+            <caption>
+                <a href="{% url 'admin:lessons_lesson_changelist' %}">Занятия</a>
+            </caption>
+            <tr>
+                <th scope="row"><a href="{% url 'admin:lessons_lesson_changelist' %}">Список занятий</a></th>
+                <td><a href="{% url 'admin:lessons_lesson_add' %}" class="addlink">Добавить</a></td>
+            </tr>
+            <tr>
+                <th scope="row"><a href="{% url 'admin:lessons_lessontype_changelist' %}">Типы занятий</a></th>
+                <td><a href="{% url 'admin:lessons_lessontype_add' %}" class="addlink">Добавить</a></td>
+            </tr>
+            <tr>
+                <th scope="row"><a href="{% url 'admin:lessons_attendance_changelist' %}">Посещаемость</a></th>
+                <td><a href="{% url 'admin:lessons_attendance_add' %}" class="addlink">Добавить</a></td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- ГРУППА 5: ФИНАНСЫ И ПЛАТЕЖИ -->
+    <div class="module">
+        <h2>💰 Финансы и платежи</h2>
+        <table>
+            <caption>
+                <a href="{% url 'admin:payments_payment_changelist' %}">Платежи</a>
+            </caption>
+            <tr>
+                <th scope="row"><a href="{% url 'admin:payments_payment_changelist' %}">Список платежей</a></th>
+                <td><a href="{% url 'admin:payments_payment_add' %}" class="addlink">Добавить</a></td>
+            </tr>
+            <tr>
+                <th scope="row"><a href="{% url 'admin:payments_invoice_changelist' %}">Счета</a></th>
+                <td><a href="{% url 'admin:payments_invoice_add' %}" class="addlink">Добавить</a></td>
+            </tr>
+            <tr>
+                <th scope="row"><a href="{% url 'admin:payments_contract_changelist' %}">Договоры</a></th>
+                <td><a href="{% url 'admin:payments_contract_add' %}" class="addlink">Добавить</a></td>
+            </tr>
+            <tr>
+                <th scope="row"><a href="{% url 'admin:payments_paymentmethod_changelist' %}">Способы оплаты</a></th>
+                <td><a href="{% url 'admin:payments_paymentmethod_add' %}" class="addlink">Добавить</a></td>
+            </tr>
+            <tr>
+                <th scope="row"><a href="{% url 'admin:payments_paymentpackage_changelist' %}">Пакеты уроков</a></th>
+                <td><a href="{% url 'admin:payments_paymentpackage_add' %}" class="addlink">Добавить</a></td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- ГРУППА 6: ВЗАИМОДЕЙСТВИЯ И УВЕДОМЛЕНИЯ -->
+    <div class="module">
+        <h2>💬 Взаимодействия и уведомления</h2>
+        <table>
+            <caption>
+                <a href="{% url 'admin:interactions_interaction_changelist' %}">Взаимодействия</a>
+            </caption>
+            <tr>
+                <th scope="row"><a href="{% url 'admin:interactions_interaction_changelist' %}">История взаимодействий</a></th>
+                <td><a href="{% url 'admin:interactions_interaction_add' %}" class="addlink">Добавить</a></td>
+            </tr>
+            <tr>
+                <th scope="row"><a href="{% url 'admin:interactions_notification_changelist' %}">Уведомления</a></th>
+                <td><a href="{% url 'admin:interactions_notification_add' %}" class="addlink">Добавить</a></td>
+            </tr>
+            <tr>
+                <th scope="row"><a href="{% url 'admin:interactions_interactiontype_changelist' %}">Типы взаимодействий</a></th>
+                <td><a href="{% url 'admin:interactions_interactiontype_add' %}" class="addlink">Добавить</a></td>
+            </tr>
+            <tr>
+                <th scope="row"><a href="{% url 'admin:interactions_comment_changelist' %}">Комментарии</a></th>
+                <td><a href="{% url 'admin:interactions_comment_add' %}" class="addlink">Добавить</a></td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- ГРУППА 7: ЗАДАЧИ -->
+    <div class="module">
+        <h2>✅ Задачи</h2>
+        <table>
+            <caption>
+                <a href="{% url 'admin:tasks_task_changelist' %}">Задачи</a>
+            </caption>
+            <tr>
+                <th scope="row"><a href="{% url 'admin:tasks_task_changelist' %}">Список задач</a></th>
+                <td><a href="{% url 'admin:tasks_task_add' %}" class="addlink">Добавить</a></td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- ГРУППА 8: СИСТЕМНЫЕ (Django стандартные) -->
+    {% if app_list %}
+    <div class="module">
+        <h2>⚙️ Системные настройки</h2>
+        <table>
+            {% for app in app_list %}
+                {% if app.name == 'auth' or app.name == 'contenttypes' or app.name == 'sessions' %}
+                <caption>{{ app.name|capfirst }}</caption>
+                {% for model in app.models %}
+                <tr>
+                    <th scope="row"><a href="{{ model.admin_url }}">{{ model.name }}</a></th>
+                    {% if model.add_url %}
+                    <td><a href="{{ model.add_url }}" class="addlink">Добавить</a></td>
+                    {% else %}
+                    <td>&nbsp;</td>
+                    {% endif %}
+                </tr>
+                {% endfor %}
+                {% endif %}
+            {% endfor %}
+        </table>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

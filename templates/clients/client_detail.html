@@ -1,0 +1,671 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ client }} — MUSERP{% endblock %}
+
+{% block content %}
+
+<style>
+:root {
+    --primary: #00dbe9;
+    --primary-dim: #004f54;
+    --secondary: #ecb2ff;
+    --bg-primary: #131315;
+    --bg-surface: #201f21;
+    --glass-bg: rgba(32, 31, 33, 0.75);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --text-primary: #e5e1e4;
+    --text-muted: #b9cacb;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --error: #ef4444;
+    --radius-md: 12px;
+    --radius-full: 9999px;
+    --space-md: 24px;
+    --space-sm: 16px;
+    --space-xs: 8px;
+}
+
+/* Основной контейнер */
+.client-detail-grid {
+    display: grid;
+    grid-template-columns: 300px 1fr 280px;
+    gap: var(--space-md);
+    min-height: calc(100vh - 120px);
+    padding: var(--space-md);
+    animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* === GLASS CARD === */
+.glass-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.glass-card:hover {
+    border-color: rgba(0, 219, 233, 0.3);
+    box-shadow: 0 0 20px rgba(0, 219, 233, 0.1);
+}
+
+/* === LEFT COLUMN: PROFILE === */
+.profile-header {
+    text-align: center;
+    margin-bottom: var(--space-md);
+}
+
+.profile-avatar {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto var(--space-sm);
+    border-radius: var(--radius-full);
+    border: 2px solid var(--primary);
+    box-shadow: 0 0 15px rgba(0, 219, 233, 0.3);
+    overflow: hidden;
+    background: var(--bg-surface);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.avatar-placeholder { font-size: 32px; font-weight: 700; color: var(--primary); }
+
+.profile-name h2 {
+    font-size: 18px;
+    margin-bottom: 4px;
+    cursor: text;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: color 0.2s;
+}
+
+.profile-name h2:hover { color: var(--primary); }
+.profile-name h2 .edit-icon { opacity: 0; font-size: 14px; transition: opacity 0.2s; }
+.profile-name h2:hover .edit-icon { opacity: 0.6; }
+
+.status-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: var(--radius-full);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-active { background: rgba(16, 185, 129, 0.15); color: var(--success); }
+.status-new { background: rgba(0, 219, 233, 0.15); color: var(--primary); }
+.status-inactive { background: rgba(255, 255, 255, 0.05); color: var(--text-muted); }
+
+/* Balance */
+.profile-balance {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-md);
+}
+
+.balance-mini {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: var(--radius-md);
+    padding: 10px;
+    text-align: center;
+    border: 1px solid var(--glass-border);
+}
+
+.balance-label { display: block; font-size: 10px; color: var(--text-muted); margin-bottom: 2px; text-transform: uppercase; }
+.balance-value { font-size: 20px; font-weight: 700; color: var(--primary); }
+
+/* Contacts */
+.contacts-block { margin-top: var(--space-sm); }
+.section-title {
+    font-size: 12px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+    letter-spacing: 1px;
+    border-bottom: 1px solid var(--glass-border);
+    padding-bottom: 6px;
+}
+
+.contact-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--glass-border);
+    font-size: 13px;
+}
+
+.contact-item:last-child { border-bottom: none; }
+.contact-item .icon { color: var(--primary); }
+.contact-item a { color: var(--text-primary); text-decoration: none; transition: color 0.2s; }
+.contact-item a:hover { color: var(--primary); }
+
+/* === CENTER COLUMN: CHAT === */
+.chat-container {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 180px);
+}
+
+.chat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: var(--space-sm);
+    border-bottom: 1px solid var(--glass-border);
+    margin-bottom: var(--space-sm);
+}
+
+.chat-header h3 { margin: 0; font-size: 16px; }
+
+.chat-filters { display: flex; gap: 6px; }
+
+.filter-btn {
+    padding: 6px 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid transparent;
+    border-radius: var(--radius-full);
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 12px;
+    transition: all 0.2s;
+}
+
+.filter-btn:hover, .filter-btn.active {
+    background: rgba(0, 219, 233, 0.1);
+    color: var(--primary);
+    border-color: var(--primary);
+}
+
+.chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--space-sm);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* Chat Bubble */
+.chat-message {
+    display: flex;
+    gap: 12px;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: var(--radius-md);
+    border-left: 3px solid var(--text-muted);
+    transition: background 0.2s;
+}
+
+.chat-message:hover { background: rgba(255, 255, 255, 0.04); }
+
+.message-comment { border-left-color: var(--primary); }
+.message-task { border-left-color: #ecb2ff; }
+.message-call { border-left-color: var(--success); }
+.message-lesson { border-left-color: var(--warning); }
+
+.message-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-full);
+    background: linear-gradient(135deg, var(--bg-surface), var(--bg-primary));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+    border: 1px solid var(--glass-border);
+}
+
+.message-content { flex: 1; min-width: 0; }
+
+.message-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 4px;
+}
+
+.message-author { font-weight: 600; color: var(--primary); font-size: 13px; }
+.message-time { font-size: 10px; color: var(--text-muted); }
+
+.message-note {
+    font-size: 13px;
+    color: var(--text-primary);
+    line-height: 1.4;
+    margin-bottom: 6px;
+}
+
+.message-meta {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+.tag-badge {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-muted);
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+/* Chat Input */
+.chat-input-wrapper {
+    margin-top: var(--space-sm);
+    display: flex;
+    gap: var(--space-xs);
+    background: var(--bg-surface);
+    padding: 8px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--glass-border);
+}
+
+.chat-input-left select {
+    background: var(--bg-primary);
+    border: none;
+    color: var(--text-primary);
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    outline: none;
+    font-size: 16px;
+}
+
+.chat-input-center {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    padding: 0 8px;
+    outline: none;
+    font-size: 14px;
+}
+
+.send-button {
+    background: var(--primary);
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 6px;
+    color: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.send-button:hover { transform: scale(1.05); }
+
+/* === RIGHT COLUMN: ACTIONS === */
+.action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 10px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    margin-bottom: 8px;
+    transition: all 0.2s;
+    cursor: pointer;
+    border: none;
+}
+
+.btn-primary-glow {
+    background: linear-gradient(135deg, var(--primary), #00b8c4);
+    color: #000;
+    box-shadow: 0 0 15px rgba(0, 219, 233, 0.2);
+}
+
+.btn-primary-glow:hover { box-shadow: 0 0 25px rgba(0, 219, 233, 0.4); }
+
+.btn-outline {
+    background: transparent;
+    border: 1px solid var(--glass-border);
+    color: var(--text-primary);
+}
+
+.btn-outline:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: var(--text-muted);
+}
+
+.tag-cloud { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.tag {
+    padding: 4px 10px;
+    background: rgba(0, 219, 233, 0.05);
+    border: 1px solid rgba(0, 219, 233, 0.2);
+    color: var(--primary);
+    border-radius: var(--radius-full);
+    font-size: 11px;
+}
+
+/* Stats */
+.stats-grid {
+    display: grid;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.stats-grid div {
+    display: flex;
+    justify-content: space-between;
+}
+
+.stats-grid span:last-child {
+    color: var(--primary);
+    font-weight: bold;
+}
+
+/* Mobile */
+@media (max-width: 1200px) {
+    .client-detail-grid { grid-template-columns: 1fr; }
+    .chat-container { height: auto; min-height: 400px; }
+    .profile-balance { grid-template-columns: 1fr 1fr; }
+}
+</style>
+
+<div class="client-detail-grid">
+    
+    <!-- ЛЕВАЯ КОЛОНКА: Профиль клиента -->
+    <div class="client-profile-sidebar">
+        <div class="glass-card">
+            <div class="profile-header">
+                <div class="profile-avatar">
+                    {% if client.photo %}
+                    <img src="{{ client.photo.url }}" alt="{{ client }}">
+                    {% else %}
+                    <div class="avatar-placeholder">
+                        {{ client.last_name|slice:":1" }}{{ client.first_name|slice:":1" }}
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="profile-name">
+                    <h2 onclick="editClientName(this)">
+                        {{ client.last_name }} {{ client.first_name }}
+                        <span class="material-symbols-outlined edit-icon">edit</span>
+                    </h2>
+                    <span class="status-badge status-{{ client.status|lower }}">
+                        {{ client.get_status_display }}
+                    </span>
+                </div>
+            </div>
+            
+            <div class="profile-balance">
+                <div class="balance-mini">
+                    <span class="balance-label">Уроков</span>
+                    <span class="balance-value">{{ total_remaining_lessons|default:"0" }}</span>
+                </div>
+                <div class="balance-mini">
+                    <span class="balance-label">Практика</span>
+                    <span class="balance-value">{{ total_remaining_practice|default:"0" }} ч.</span>
+                </div>
+            </div>
+            
+            <div class="contacts-block">
+                <div class="section-title">Контакты</div>
+                <div class="contact-item">
+                    <span class="material-symbols-outlined icon">phone</span>
+                    <a href="tel:{{ client.phone }}">{{ client.phone }}</a>
+                </div>
+                {% if client.email %}
+                <div class="contact-item">
+                    <span class="material-symbols-outlined icon">email</span>
+                    <a href="mailto:{{ client.email }}">{{ client.email }}</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- ЦЕНТРАЛЬНАЯ КОЛОНКА: Лог взаимодействий (Чат) -->
+    <div class="client-timeline">
+        <div class="glass-card chat-container">
+            <div class="chat-header">
+                <h3>💬 История</h3>
+                <div class="chat-filters">
+                    <a href="?filter=all&{{ request.GET.urlencode }}" class="filter-btn {% if log_filter == 'all' or not log_filter %}active{% endif %}">Все</a>
+                    <a href="?filter=comment&{{ request.GET.urlencode }}" class="filter-btn {% if log_filter == 'comment' %}active{% endif %}">Комменты</a>
+                    <a href="?filter=task&{{ request.GET.urlencode }}" class="filter-btn {% if log_filter == 'task' %}active{% endif %}">Задачи</a>
+                </div>
+            </div>
+            
+            <div class="chat-messages" id="chatMessages">
+                {% for entry in log_entries %}
+                <div class="chat-message message-{{ entry.subtype }}">
+                    <div class="message-avatar">
+                        {% if entry.type == 'lesson' %}🎵
+                        {% elif entry.type == 'task' %}📋
+                        {% elif entry.subtype == 'call' %}📞
+                        {% else %}💬{% endif %}
+                    </div>
+                    <div class="message-content">
+                        <div class="message-header">
+                            <span class="message-author">{{ entry.created_by.get_full_name|default:entry.created_by|default:"Система" }}</span>
+                            <span class="message-time">{{ entry.date_time|date:"d.m H:i" }}</span>
+                        </div>
+                        {% if entry.subject %}
+                        <div style="font-weight:600; margin-bottom:4px; font-size:13px;">{{ entry.subject }}</div>
+                        {% endif %}
+                        {% if entry.note %}
+                        <div class="message-note">{{ entry.note }}</div>
+                        {% endif %}
+                        {% if entry.type == 'task' %}
+                        <div class="message-meta">
+                            <span class="tag-badge" style="background:rgba(236,178,255,0.15); color:#ecb2ff;">{{ entry.status }}</span>
+                            <span class="tag-badge">{{ entry.priority }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% empty %}
+                <div style="text-align:center; padding:40px; color:var(--text-muted);">
+                    <div style="font-size:40px; margin-bottom:10px;">👋</div>
+                    <p>История чиста. Оставьте первый комментарий!</p>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Поле ввода -->
+            <div class="chat-input-wrapper">
+                <div class="chat-input-left">
+                    <select name="type" id="inputType" onchange="updatePlaceholder()">
+                        <option value="comment">💬</option>
+                        <option value="call">📞</option>
+                        <option value="task">📋</option>
+                    </select>
+                </div>
+                <form action="{% url 'core:create_interaction' client.pk %}" method="POST" style="flex:1; display:flex; gap:8px;">
+                    {% csrf_token %}
+                    <input type="hidden" name="type" id="hiddenType" value="comment">
+                    <input type="text" name="content" id="inputContent" class="chat-input-center" placeholder="Написать комментарий..." required autocomplete="off">
+                    <button type="submit" class="send-button">
+                        <span class="material-symbols-outlined">send</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ПРАВАЯ КОЛОНКА: Быстрые действия -->
+    <div class="quick-actions-sidebar">
+        <div class="glass-card">
+            <div class="section-title">Быстрые действия</div>
+            
+            <a href="{% url 'core:payment_create' %}" class="action-btn btn-primary-glow" onclick="event.preventDefault(); window.open('{% url 'core:payment_create' %}?client_id={{ client.pk }}', '_self');">
+                <span class="material-symbols-outlined">add</span>
+                Создать платёж
+            </a>
+            
+            <button class="action-btn btn-outline" onclick="focusInput('call')">
+                <span class="material-symbols-outlined">phone_callback</span>
+                Зафиксировать звонок
+            </button>
+
+            <button class="action-btn btn-outline" onclick="focusInput('task')">
+                <span class="material-symbols-outlined">assignment</span>
+                Поставить задачу
+            </button>
+        </div>
+
+        {% if payments %}
+        <div class="glass-card" style="margin-top: var(--space-md);">
+            <div class="section-title" style="display:flex; justify-content:space-between; align-items:center;">
+                <span>Платежи</span>
+                <a href="{% url 'core:payments_list' %}?client_id={{ client.pk }}" style="font-size:11px; color:var(--primary); text-decoration:none;">Все →</a>
+            </div>
+            
+            <div style="max-height: 200px; overflow-y: auto; margin-top: 12px;">
+                {% for payment in payments %}
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--glass-border);">
+                    <div style="flex:1;">
+                        <div style="font-size:13px; font-weight:500;">{{ payment.amount|floatformat:0 }} ₽</div>
+                        <div style="font-size:11px; color:var(--text-muted);">{{ payment.created_at|date:"d.m.Y" }}</div>
+                    </div>
+                    <div>
+                        {% if payment.status == 'COMPLETED' %}
+                            <span style="font-size:10px; padding:2px 6px; background:rgba(16,185,129,0.15); color:var(--success); border-radius:4px;">✓</span>
+                        {% elif payment.status == 'PENDING' %}
+                            <span style="font-size:10px; padding:2px 6px; background:rgba(245,158,11,0.15); color:var(--warning); border-radius:4px;">⏳</span>
+                        {% elif payment.status == 'CANCELLED' %}
+                            <span style="font-size:10px; padding:2px 6px; background:rgba(239,68,68,0.15); color:var(--error); border-radius:4px;">✕</span>
+                        {% else %}
+                            <span style="font-size:10px; padding:2px 6px; background:rgba(156,163,175,0.15); color:#9ca3af; border-radius:4px;">↺</span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--glass-border);">
+                <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px;">
+                    <span style="color:var(--text-muted);">Всего оплачено:</span>
+                    <span style="color:var(--success); font-weight:600;">{{ total_payments_amount|floatformat:0 }} ₽</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; font-size:12px;">
+                    <span style="color:var(--text-muted);">Платежей:</span>
+                    <span style="color:var(--primary); font-weight:600;">{{ payments.count }}</span>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        {% if client.tags %}
+        <div class="glass-card" style="margin-top: var(--space-md);">
+            <div class="section-title">Теги</div>
+            <div class="tag-cloud">
+                {% for tag in client.tags|cut:"," %}
+                {% if tag %}
+                <span class="tag">{{ tag }}</span>
+                {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Статистика -->
+        <div class="glass-card" style="margin-top: var(--space-md);">
+             <div class="section-title">Статистика</div>
+             <div class="stats-grid">
+                 <div>
+                     <span>Всего взаимодействий:</span>
+                     <span>{{ log_entries|length }}</span>
+                 </div>
+                 <div>
+                     <span>Задач выполнено:</span>
+                     <span style="color:var(--success);">{{ tasks|length }}</span>
+                 </div>
+                 <div>
+                     <span>С {{ client.created_at|date:"d.m.y" }}</span>
+                     <span style="color:var(--text-muted);">в CRM</span>
+                 </div>
+             </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Скролл вниз при загрузке
+document.addEventListener('DOMContentLoaded', function() {
+    const chatMessages = document.getElementById('chatMessages');
+    if (chatMessages) {
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+});
+
+// Фокус на инпуте
+function focusInput(type) {
+    document.getElementById('inputType').value = type;
+    updatePlaceholder();
+    document.getElementById('inputContent').focus();
+}
+
+// Переключение плейсхолдера
+function updatePlaceholder() {
+    const type = document.getElementById('inputType').value;
+    const input = document.getElementById('inputContent');
+    const hiddenInput = document.getElementById('hiddenType');
+    
+    hiddenInput.value = type;
+    
+    if (type === 'comment') input.placeholder = "Написать комментарий...";
+    else if (type === 'call') input.placeholder = "Результат звонка...";
+    else if (type === 'task') input.placeholder = "Описание задачи...";
+}
+
+// Редактирование имени
+function editClientName(el) {
+    const originalText = el.innerText.replace('edit', '').trim();
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.value = originalText;
+    input.style.background = 'transparent';
+    input.style.border = 'none';
+    input.style.color = 'var(--text-primary)';
+    input.style.fontSize = '18px';
+    input.style.fontWeight = 'bold';
+    input.style.width = '100%';
+    input.style.textAlign = 'center';
+    
+    el.parentNode.replaceChild(input, el);
+    input.focus();
+    
+    input.addEventListener('blur', function() {
+        const newName = input.value;
+        if (newName !== originalText && newName.trim()) {
+            console.log("Saving name:", newName);
+            alert("Функция сохранения имени будет подключена к API");
+        }
+        location.reload();
+    });
+    
+    input.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') this.blur();
+    });
+}
+</script>
+
+{% endblock %}

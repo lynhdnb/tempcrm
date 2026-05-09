@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block title %}Удалить клиента{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>🗑️ Удаление клиента</h1>
+        <p>Подтвердите удаление клиента</p>
+    </div>
+    <div class="page-actions">
+        <a href="{% url 'core:client_list' %}" class="btn-secondary">
+            ← Отмена
+        </a>
+    </div>
+</div>
+
+<div class="glass-card" style="max-width: 600px; text-align: center;">
+    <div class="delete-warning">
+        <span class="material-symbols-outlined" style="font-size: 64px; color: #dc3545;">warning</span>
+    </div>
+    
+    <h2 style="margin-bottom: var(--space-md);">Вы уверены, что хотите удалить этого клиента?</h2>
+    
+    <div class="client-info" style="background: var(--bg-surface); padding: var(--space-md); border-radius: var(--radius-md); margin-bottom: var(--space-lg);">
+        <p><strong>ФИО:</strong> {{ client.last_name }} {{ client.first_name }} {% if client.middle_name %}{{ client.middle_name }}{% endif %}</p>
+        <p><strong>Телефон:</strong> {{ client.phone }}</p>
+        <p><strong>Email:</strong> {{ client.email|default:"Не указан" }}</p>
+        <p><strong>Статус:</strong> {{ client.get_status_display }}</p>
+    </div>
+    
+    <div class="warning-text" style="color: #dc3545; margin-bottom: var(--space-lg);">
+        <p><strong>⚠️ Внимание!</strong></p>
+        <p>Это действие нельзя отменить. Все данные о клиенте будут помечены как удалённые.</p>
+        <p>История записей на курсы и занятий останется в системе для отчётности.</p>
+    </div>
+    
+    <form method="POST" style="display: flex; gap: var(--space-md); justify-content: center;">
+        {% csrf_token %}
+        <button type="submit" class="btn-danger">
+            🗑️ Да, удалить клиента
+        </button>
+        <a href="{% url 'core:client_detail' client.pk %}" class="btn-secondary">
+            Отмена
+        </a>
+    </form>
+</div>
+
+<style>
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: var(--space-lg);
+    }
+    
+    .page-actions {
+        display: flex;
+        gap: var(--space-sm);
+    }
+    
+    .glass-card {
+        padding: var(--space-lg);
+        border-radius: var(--radius-lg);
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    
+    .delete-warning {
+        margin-bottom: var(--space-md);
+    }
+    
+    .client-info {
+        text-align: left;
+    }
+    
+    .client-info p {
+        margin: 8px 0;
+    }
+    
+    .warning-text {
+        background: #fff3f3;
+        border: 1px solid #ffcdd2;
+        padding: var(--space-md);
+        border-radius: var(--radius-md);
+    }
+    
+    .warning-text p {
+        margin: 8px 0;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}Удалить тариф - MUSERP{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>
+            <span class="material-symbols-outlined">warning</span>
+            Удаление тарифа
+        </h1>
+        <p>Подтвердите действие</p>
+    </div>
+</div>
+
+<div class="confirm-dialog">
+    <div class="confirm-icon error">
+        <span class="material-symbols-outlined">error_outline</span>
+    </div>
+    
+    <h2>Вы уверены?</h2>
+    <p>
+        Вы собираетесь {{ tariff.is_active|yesno:"отключить,включить" }} тариф:
+    </p>
+    
+    <div class="confirm-card">
+        <h3>{{ tariff.name }}</h3>
+        <div class="confirm-details">
+            <div class="detail">
+                <strong>Категория:</strong>
+                <span>{{ tariff.get_category_display }}</span>
+            </div>
+            <div class="detail">
+                <strong>Цена:</strong>
+                <span>{{ tariff.price }} ₽</span>
+            </div>
+            {% if tariff.lesson_count %}
+            <div class="detail">
+                <strong>Занятий:</strong>
+                <span>{{ tariff.lesson_count }}</span>
+            </div>
+            {% endif %}
+            <div class="detail">
+                <strong>Статус:</strong>
+                <span class="badge {% if tariff.is_active %}badge-success{% else %}badge-secondary{% endif %}">
+                    {{ tariff.get_is_active_display }}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <div class="warning-text">
+        <span class="material-symbols-outlined">warning</span>
+        <p>
+            {% if tariff.is_active %}
+            После отключения этот тариф нельзя будет выбрать при зачислении новых клиентов.
+            Существующие записи останутся без изменений.
+            {% else %}
+            Тариф будет снова доступен для выбора при зачислении клиентов.
+            {% endif %}
+        </p>
+    </div>
+
+    <form method="post" class="confirm-actions">
+        {% csrf_token %}
+        <button type="submit" class="btn-danger">
+            <span class="material-symbols-outlined">check</span>
+            {% if tariff.is_active %}Отключить{% else %}Включить{% endif %}
+        </button>
+        <a href="{% url 'core:tariffs_list' %}" class="btn-secondary">
+            <span class="material-symbols-outlined">cancel</span>
+            Отмена
+        </a>
+    </form>
+</div>
+{% endblock %}

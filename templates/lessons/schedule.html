@@ -1,0 +1,208 @@
+{% extends 'base.html' %}
+
+{% block title %}Расписание — MUSERP{% endblock %}
+
+{% block content %}
+    <div class="page-header">
+        <div>
+            <h1>📅 Расписание занятий</h1>
+            <p>Управление расписанием и занятиями</p>
+        </div>
+        <div class="page-actions">
+            <button class="btn-secondary" id="todayBtn">
+                <span class="material-symbols-outlined">today</span>
+                Сегодня
+            </button>
+        </div>
+    </div>
+
+    <!-- Календарь FullCalendar -->
+    <div class="glass-card" style="padding: var(--space-md);">
+        <div id="calendar" style="max-width: 100%;"></div>
+    </div>
+{% endblock %}
+
+{% block extra_css %}
+<!-- FullCalendar CSS -->
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css" rel="stylesheet">
+<style>
+/* Адаптация FullCalendar под тёмную тему */
+.fc {
+    --fc-neutral-bg-color: rgba(255, 255, 255, 0.03);
+    --fc-list-event-hover-bg-color: rgba(0, 219, 233, 0.1);
+    --fc-page-bg-color: transparent;
+    --fc-event-bg-color: var(--primary);
+    --fc-event-border-color: var(--primary);
+    --fc-event-text-color: #000;
+    --fc-event-selected-overlay-color: rgba(0, 219, 233, 0.25);
+    --fc-more-link-bg-color: rgba(236, 178, 255, 0.2);
+    --fc-more-link-text-color: var(--secondary);
+    --fc-event-resizer-thickness: 3px;
+    --fc-event-resizer-dot-total-width: 3px;
+    --fc-event-resizer-dot-border-width: 0;
+    --fc-non-business-color: rgba(255, 255, 255, 0.02);
+    --fc-bg-event-color: rgba(0, 219, 233, 0.15);
+    --fc-bg-event-opacity: 0.3;
+    --fc-highlight-color: rgba(0, 219, 233, 0.1);
+    --fc-today-bg-color: rgba(0, 219, 233, 0.05);
+    --fc-border-color: var(--glass-border);
+    --fc-button-bg-color: var(--bg-surface);
+    --fc-button-border-color: var(--glass-border);
+    --fc-button-text-color: var(--text-primary);
+    --fc-button-hover-bg-color: var(--bg-surface-high);
+    --fc-button-hover-border-color: var(--primary);
+    --fc-button-active-bg-color: var(--primary);
+    --fc-button-active-border-color: var(--primary);
+    --fc-button-active-text-color: #000;
+    font-family: 'Manrope', -apple-system, sans-serif;
+    color: var(--text-primary);
+}
+
+/* Заголовок календаря */
+.fc-toolbar-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.5rem !important;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* Кнопки навигации */
+.fc-button {
+    border-radius: var(--radius-md) !important;
+    padding: 8px 16px !important;
+    font-weight: 500 !important;
+    transition: all 0.2s !important;
+}
+
+.fc-button-primary:focus {
+    box-shadow: 0 0 0 3px rgba(0, 219, 233, 0.3) !important;
+}
+
+/* Сетка календаря */
+.fc-daygrid-day {
+    padding: 4px !important;
+}
+
+.fc-daygrid-day-number {
+    color: var(--text-primary) !important;
+    font-weight: 500 !important;
+}
+
+/* События */
+.fc-event {
+    border: none !important;
+    border-radius: var(--radius-sm) !important;
+    padding: 4px 8px !important;
+    font-size: 13px !important;
+    cursor: pointer !important;
+    transition: all 0.2s !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.fc-event:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 12px rgba(0, 219, 233, 0.3) !important;
+}
+
+/* Текущий день */
+.fc-day-today {
+    background: rgba(0, 219, 233, 0.05) !important;
+}
+
+/* Скроллбар */
+.fc-scroller {
+    scrollbar-width: thin;
+    scrollbar-color: var(--bg-surface-high) transparent;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .fc-toolbar {
+        flex-direction: column !important;
+        gap: 12px !important;
+    }
+    
+    .fc-button {
+        font-size: 12px !important;
+        padding: 6px 12px !important;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<!-- FullCalendar JS -->
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var calendarEl = document.getElementById('calendar');
+    
+    // Получаем данные из Django
+    var events = {{ events|safe }};
+    
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+        // Режим просмотра
+        initialView: 'dayGridMonth',
+        locale: 'ru',
+        
+        // Высота
+        height: 'auto',
+        contentHeight: 600,
+        
+        // Заголовок
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,timeGridDay'
+        },
+        
+        // Кнопки
+        buttonText: {
+            today: 'Сегодня',
+            month: 'Месяц',
+            week: 'Неделя',
+            day: 'День',
+            list: 'Список'
+        },
+        
+        // События
+        events: events,
+        
+        // Клики
+        eventClick: function(info) {
+            var event = info.event;
+            if (event.extendedProps.lessonId) {
+                // Открываем детали занятия
+                alert('Занятие: ' + event.title + '\n' + 
+                      'Студент: ' + event.extendedProps.student + '\n' +
+                      'Преподаватель: ' + event.extendedProps.teacher + '\n' +
+                      'Кабинет: ' + event.extendedProps.room);
+            }
+        },
+        
+        // День клика
+        dateClick: function(info) {
+            console.log('Clicked date: ' + info.dateStr);
+            // Здесь можно добавить модальное окно для создания занятия
+        },
+        
+        // Плавная прокрутка
+        scrollTime: '09:00:00',
+        
+        // Время работы
+        slotMinTime: '09:00:00',
+        slotMaxTime: '22:00:00',
+        
+        //weekNumbers: true,
+    });
+    
+    calendar.render();
+    
+    // Кнопка "Сегодня"
+    document.getElementById('todayBtn').addEventListener('click', function() {
+        calendar.today();
+    });
+});
+</script>
+{% endblock %}
+

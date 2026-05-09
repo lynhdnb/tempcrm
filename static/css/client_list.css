@@ -1,0 +1,105 @@
+/* ====== КЛИКАБЕЛЬНЫЕ СТРОКИ ТАБЛИЦЫ ====== */
+.clickable-row {
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.clickable-row:hover {
+    background: rgba(0, 219, 233, 0.08) !important;
+}
+
+/* ====== ACTION MENU ====== */
+.action-menu {
+    position: relative;
+    display: inline-block;
+}
+
+.action-menu-btn {
+    background: var(--bg-surface) !important;
+    border: 1px solid var(--glass-border) !important;
+    border-radius: var(--radius-md) !important;
+    padding: 8px 12px !important;
+    cursor: pointer !important;
+    font-size: 20px !important;
+    min-width: 40px !important;
+    color: var(--text-muted) !important;
+    transition: all 0.2s !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.action-menu-btn:hover {
+    background: var(--bg-surface-high) !important;
+    border-color: var(--primary) !important;
+    color: var(--primary) !important;
+}
+
+/* Выпадающее меню */
+.action-menu-dropdown {
+    display: none !important;
+    position: absolute;
+    right: 0;
+    top: 100%;
+    background: var(--bg-surface) !important;
+    border: 1px solid var(--glass-border) !important;
+    border-radius: var(--radius-md) !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4) !important;
+    backdrop-filter: blur(12px) !important;
+    z-index: 1000 !important;
+    min-width: 180px !important;
+    overflow: hidden !important;
+}
+
+.action-menu.active .action-menu-dropdown {
+    display: block !important;
+    animation: fadeIn 0.2s ease !important;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Ссылки в меню */
+.action-menu-dropdown a {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    padding: 12px 16px !important;
+    color: var(--text-primary) !important;
+    text-decoration: none !important;
+    border-bottom: 1px solid var(--glass-border) !important;
+    font-size: 14px !important;
+    transition: all 0.2s !important;
+}
+
+.action-menu-dropdown a:last-child {
+    border-bottom: none !important;
+}
+
+.action-menu-dropdown a:hover {
+    background: rgba(0, 219, 233, 0.1) !important;
+    color: var(--primary) !important;
+}
+
+.action-menu-dropdown a .material-symbols-outlined {
+    font-size: 18px !important;
+    color: inherit !important;
+}
+
+/* Кнопка удаления */
+.action-menu-dropdown .delete-link {
+    color: var(--error) !important;
+}
+
+.action-menu-dropdown .delete-link:hover {
+    background: rgba(239, 68, 68, 0.15) !important;
+    color: var(--error) !important;
+}

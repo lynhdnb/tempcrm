@@ -1,0 +1,147 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}MUSERP{% endblock %}</title>
+    <!-- Шрифты и иконки -->
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+    <!-- CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    {% block extra_css %}{% endblock %}
+    {% block extrahead %}{% endblock %}
+</head>
+<body>
+    <!-- TOP BAR -->
+    <header class="topbar">
+    <div class="topbar-brand">
+        <button id="sidebar-toggle" title="Свернуть меню" style="background:none;border:none;color:var(--primary);cursor:pointer;padding:0;margin-right:8px;">
+            <span class="material-symbols-outlined">menu</span>
+        </button>
+        <span class="material-symbols-outlined">graphic_eq</span>
+        MUSERP
+    </div>
+        <nav class="topbar-nav">
+            {% block topbar_nav %}
+            {% endblock %}
+        </nav>
+    <div class="topbar-actions">
+        <button title="Уведомления">
+            <span class="material-symbols-outlined">notifications</span>
+        </button>
+        <button title="Поиск">
+            <span class="material-symbols-outlined">search</span>
+        </button>
+        <div class="user-avatar" title="{{ user.get_full_name|default:user.username }}">
+            {{ user.get_full_name|default:user.username|slice:":2"|upper }}
+        </div>
+    </div>
+    </header>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <!-- Единый сайдбар для всех страниц -->
+        <a href="{% url 'core:dashboard' %}" class="sidebar-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+            <span class="material-symbols-outlined">dashboard</span>
+            <span class="sidebar-text">Обзор</span>
+        </a>
+        <a href="{% url 'core:client_list' %}" class="sidebar-item {% if 'client' in request.resolver_match.url_name and 'enrollment' not in request.resolver_match.url_name %}active{% endif %}">
+            <span class="material-symbols-outlined">people</span>
+            <span class="sidebar-text">Клиенты</span>
+        </a>
+        <a href="{% url 'core:courses_list' %}" class="sidebar-item {% if 'course' in request.resolver_match.url_name %}active{% endif %}">
+            <span class="material-symbols-outlined">school</span>
+            <span class="sidebar-text">Курсы</span>
+        </a>
+        <a href="{% url 'core:enrollments_list' %}" class="sidebar-item {% if 'enrollment' in request.resolver_match.url_name %}active{% endif %}">
+            <span class="material-symbols-outlined">assignment</span>
+            <span class="sidebar-text">Зачисления</span>
+        </a>
+        <a href="{% url 'core:payments_list' %}" class="sidebar-item {% if 'payment' in request.resolver_match.url_name %}active{% endif %}">
+            <span class="material-symbols-outlined">payments</span>
+            <span class="sidebar-text">Платежи</span>
+        </a>
+        <a href="{% url 'core:schedule' %}" class="sidebar-item {% if request.resolver_match.url_name == 'schedule' %}active{% endif %}">
+            <span class="material-symbols-outlined">calendar_month</span>
+            <span class="sidebar-text">Расписание</span>
+        </a>
+        <a href="{% url 'core:tasks_list' %}" class="sidebar-item {% if request.resolver_match.url_name == 'tasks_list' %}active{% endif %}">
+            <span class="material-symbols-outlined">task_alt</span>
+            <span class="sidebar-text">Задачи</span>
+        </a>
+        <a href="{% url 'core:settings' %}" class="sidebar-item {% if request.resolver_match.url_name == 'settings' %}active{% endif %}">
+            <span class="material-symbols-outlined">settings</span>
+            <span class="sidebar-text">Настройки</span>
+        </a>
+        
+        <!-- Контекстные кнопки действий -->
+        {% if 'client' in request.resolver_match.url_name or request.resolver_match.url_name == 'dashboard' %}
+        <div class="sidebar-cta">
+            <a href="{% url 'core:client_create' %}" class="btn-primary" style="text-decoration:none;">
+                <span class="material-symbols-outlined">add</span>
+                <span class="btn-text">Новый клиент</span>
+            </a>
+        </div>
+        {% elif 'course' in request.resolver_match.url_name %}
+        <div class="sidebar-cta">
+            <a href="{% url 'core:course_create' %}" class="btn-primary" style="text-decoration:none;">
+                <span class="material-symbols-outlined">add</span>
+                <span class="btn-text">Новый курс</span>
+            </a>
+        </div>
+        {% endif %}
+        
+        <div class="sidebar-cta" style="margin-top: auto; padding-top: var(--space-md); border-top: 1px solid var(--glass-border);">
+            <a href="{% url 'core:logout' %}" class="sidebar-item" style="color: var(--error);">
+                <span class="material-symbols-outlined">logout</span>
+                <span class="sidebar-text">Выйти</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    {% block extra_js %}{% endblock %}
+    
+    <!-- Скрипт для сворачивания сайдбара -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebarToggle = document.getElementById('sidebar-toggle');
+            const body = document.body;
+            
+            if (!sidebarToggle) return;
+            
+            // Проверяем сохранённое состояние
+            const sidebarCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+            if (sidebarCollapsed) {
+                body.classList.add('sidebar-collapsed');
+                sidebarToggle.classList.add('rotate');
+                sidebarToggle.innerHTML = '<span class="material-symbols-outlined">menu_open</span>';
+            }
+            
+            sidebarToggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                body.classList.toggle('sidebar-collapsed');
+                const isCollapsed = body.classList.contains('sidebar-collapsed');
+                this.classList.toggle('rotate');
+                
+                // Сохраняем состояние
+                localStorage.setItem('sidebarCollapsed', isCollapsed);
+                
+                // Меняем иконку
+                this.innerHTML = isCollapsed 
+                    ? '<span class="material-symbols-outlined">menu_open</span>'
+                    : '<span class="material-symbols-outlined">menu</span>';
+            });
+        });
+    </script>
+</body>
+</html>

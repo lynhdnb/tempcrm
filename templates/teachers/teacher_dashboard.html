@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+
+{% block title %}Дашборд преподавателя — MUSERP{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>👨‍🏫 Дашборд преподавателя</h1>
+        <p>{{ teacher_profile.user.get_full_name|default:teacher_profile.user.username }}</p>
+    </div>
+</div>
+
+<div class="bento-grid">
+    <!-- Статистика сегодня -->
+    <div class="glass-card bento-item wide">
+        <div class="section-header">
+            <h3>📊 Статистика на сегодня</h3>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-md);">
+            <div style="text-align: center; padding: 20px; background: rgba(255, 255, 255, 0.03); border-radius: var(--radius-md);">
+                <div style="font-size: 32px; font-weight: 700; color: var(--primary);">{{ lessons_today_count }}</div>
+                <div style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">Занятий сегодня</div>
+            </div>
+            <div style="text-align: center; padding: 20px; background: rgba(255, 255, 255, 0.03); border-radius: var(--radius-md);">
+                <div style="font-size: 32px; font-weight: 700; color: var(--success);">{{ lessons_week_count }}</div>
+                <div style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">На этой неделе</div>
+            </div>
+            <div style="text-align: center; padding: 20px; background: rgba(255, 255, 255, 0.03); border-radius: var(--radius-md);">
+                <div style="font-size: 32px; font-weight: 700; color: var(--secondary);">{{ active_students }}</div>
+                <div style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">Активных студентов</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Занятия сегодня -->
+    <div class="glass-card bento-item full">
+        <div class="section-header">
+            <h3>📅 Занятия на {{ today|date:"d E Y" }}</h3>
+            <a href="{% url 'core:teacher_schedule' %}" style="font-size: 13px; color: var(--primary);">Полное расписание →</a>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: var(--space-sm);">
+            {% for lesson in lessons_today %}
+            <div style="display: flex; align-items: center; gap: var(--space-md); padding: 12px; background: rgba(255, 255, 255, 0.03); border-radius: var(--radius-md);">
+                <div style="width: 48px; height: 48px; border-radius: var(--radius-md); background: linear-gradient(135deg, var(--primary), var(--secondary)); display: flex; align-items: center; justify-content: center; font-weight: 600; color: #000;">
+                    {{ lesson.start_time|date:"H:i" }}
+                </div>
+                <div style="flex: 1;">
+                    <div style="font-weight: 500;">{{ lesson.client.last_name }} {{ lesson.client.first_name }}</div>
+                    <div style="font-size: 12px; color: var(--text-muted);">
+                        {{ lesson.lesson_type.name }} • {{ lesson.get_status_display }}
+                    </div>
+                </div>
+                {% if lesson.status == 'planned' %}
+                <a href="{% url 'core:teacher_lesson_mark' lesson.id %}" class="btn-primary" style="padding: 8px 16px; font-size: 13px;">
+                    Отметить
+                </a>
+                {% endif %}
+            </div>
+            {% empty %}
+            <div style="text-align: center; padding: 20px; color: var(--text-muted);">
+                На сегодня занятий нет
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Студенты -->
+    <div class="glass-card bento-item tall">
+        <div class="section-header">
+            <h3>👥 Мои студенты</h3>
+            <a href="{% url 'core:teacher_students' %}" style="font-size: 13px; color: var(--primary);">Все →</a>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: var(--space-sm);">
+            {% for enrollment in enrollments|slice:":5" %}
+            <div style="display: flex; align-items: center; gap: var(--space-md); padding: 12px; background: rgba(255, 255, 255, 0.03); border-radius: var(--radius-md);">
+                <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--secondary)); display: flex; align-items: center; justify-content: center; font-weight: 600; color: #000;">
+                    {{ enrollment.client.last_name|slice:":1" }}{{ enrollment.client.first_name|slice:":1" }}
+                </div>
+                <div style="flex: 1;">
+                    <div style="font-weight: 500;">{{ enrollment.client.last_name }} {{ enrollment.client.first_name }}</div>
+                    <div style="font-size: 12px; color: var(--text-muted);">{{ enrollment.course.name }}</div>
+                </div>
+            </div>
+            {% empty %}
+            <div style="text-align: center; padding: 20px; color: var(--text-muted);">
+                Студентов пока нет
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Предстоящие занятия -->
+    <div class="glass-card bento-item tall">
+        <div class="section-header">
+            <h3>⏰ Предстоящие</h3>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: var(--space-sm);">
+            {% for lesson in upcoming_lessons %}
+            <div style="display: flex; align-items: center; gap: var(--space-md); padding: 12px; background: rgba(255, 255, 255, 0.03); border-radius: var(--radius-md);">
+                <div style="width: 48px; height: 48px; border-radius: var(--radius-md); background: rgba(0, 218, 233, 0.2); display: flex; align-items: center; justify-content: center; font-weight: 600; color: var(--primary);">
+                    {{ lesson.start_time|date:"H:i" }}
+                </div>
+                <div style="flex: 1;">
+                    <div style="font-weight: 500;">{{ lesson.client.last_name }} {{ lesson.client.first_name }}</div>
+                    <div style="font-size: 12px; color: var(--text-muted);">
+                        {{ lesson.start_time|date:"d E" }} • {{ lesson.lesson_type.name }}
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div style="text-align: center; padding: 20px; color: var(--text-muted);">
+                Предстоящих занятий нет
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

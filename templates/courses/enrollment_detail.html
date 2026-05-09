@@ -1,0 +1,342 @@
+{% extends 'base.html' %}
+
+{% block title %}Запись на курс #{{ enrollment.id }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>📋 Запись на курс</h1>
+        <p>ID: #{{ enrollment.id }}</p>
+    </div>
+    <div class="page-actions">
+        <a href="{% url 'core:enrollments_list' %}" class="btn-secondary">
+            <span class="material-symbols-outlined">arrow_back</span>
+            Назад
+        </a>
+    </div>
+</div>
+
+<div class="grid-2">
+    <!-- Основная информация -->
+    <div class="glass-card">
+        <h2>📝 Информация о записи</h2>
+        
+        <div class="info-table">
+            <div class="info-row">
+                <span class="label">Студент:</span>
+                <span>
+                    <a href="{% url 'core:client_detail' enrollment.client.id %}">
+                        {{ enrollment.client.last_name }} {{ enrollment.client.first_name }}
+                    </a>
+                </span>
+            </div>
+            <div class="info-row">
+                <span class="label">Курс:</span>
+                <span>
+                    <a href="{% url 'core:course_detail' enrollment.course.id %}">
+                        {{ enrollment.course.name }}
+                    </a>
+                </span>
+            </div>
+            <div class="info-row">
+                <span class="label">Статус записи:</span>
+                <span>
+                    <span class="badge badge-{{ enrollment.status|lower }}">
+                        {{ enrollment.get_status_display }}
+                    </span>
+                </span>
+            </div>
+            <div class="info-row">
+                <span class="label">Статус оплаты:</span>
+                <span>
+                    <span class="badge badge-{{ enrollment.payment_status|lower }}">
+                        {{ enrollment.get_payment_status_display }}
+                    </span>
+                </span>
+            </div>
+            <div class="info-row">
+                <span class="label">Дата начала:</span>
+                <span>{{ enrollment.start_date|date:"d.m.Y" }}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Записал:</span>
+                <span>{{ enrollment.enrolled_by.get_full_name|default:enrollment.enrolled_by.username }}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Дата записи:</span>
+                <span>{{ enrollment.created_at|date:"d.m.Y H:i" }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Условия обучения -->
+    <div class="glass-card">
+        <h2>🎓 Условия обучения</h2>
+        
+        <div class="info-table">
+            <div class="info-row">
+                <span class="label">Всего занятий:</span>
+                <span>{{ enrollment.total_lessons }} шт.</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Отработано:</span>
+                <span>{{ enrollment.completed_lessons }} шт.</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Осталось:</span>
+                <span><strong>{{ enrollment.remaining_lessons }}</strong> шт.</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Часов практики:</span>
+                <span>{{ enrollment.total_practice_hours }} ч.</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Отработано практики:</span>
+                <span>{{ enrollment.completed_practice_hours }} ч.</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Осталось практики:</span>
+                <span>
+                    {% if enrollment.is_unlimited_practice %}
+                        <span class="text-success">Безлимит</span>
+                    {% else %}
+                        <strong>{{ enrollment.remaining_practice_hours }}</strong> ч.
+                    {% endif %}
+                </span>
+            </div>
+            <div class="info-row">
+                <span class="label">Прогресс:</span>
+                <span>
+                    <div class="progress-bar" style="width: 100%;">
+                        <div class="progress-fill" style="width: {{ enrollment.progress_percentage }}%;"></div>
+                    </div>
+                    <small>{{ enrollment.progress_percentage }}%</small>
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Финансы -->
+    <div class="glass-card">
+        <h2>💰 Финансы</h2>
+        
+        <div class="info-table">
+            <div class="info-row">
+                <span class="label">Цена при записи:</span>
+                <span><strong>{{ enrollment.enrolled_price }} ₽</strong></span>
+            </div>
+            <div class="info-row">
+                <span class="label">Оплачено:</span>
+                <span>{{ enrollment.paid_amount }} ₽</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Осталось оплатить:</span>
+                <span><strong>{{ enrollment.remaining_amount }} ₽</strong></span>
+            </div>
+            <div class="info-row">
+                <span class="label">Тип рассрочки:</span>
+                <span>{{ enrollment.get_installment_type_display }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Преподаватель -->
+    {% if enrollment.assigned_teacher %}
+    <div class="glass-card">
+        <h2>👨‍🏫 Преподаватель</h2>
+        
+        <div class="info-table">
+            <div class="info-row">
+                <span class="label">ФИО:</span>
+                <span>{{ enrollment.assigned_teacher.user.get_full_name }}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Телефон:</span>
+                <span>{{ enrollment.assigned_teacher.phone|default:"Не указан" }}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Инструменты:</span>
+                <span>{{ enrollment.assigned_teacher.instruments|default:"Не указаны" }}</span>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Заметки -->
+    {% if enrollment.notes or enrollment.source %}
+    <div class="glass-card">
+        <h2>📝 Заметки</h2>
+        
+        {% if enrollment.notes %}
+        <div class="info-row">
+            <span class="label">Внутренние заметки:</span>
+            <span>{{ enrollment.notes }}</span>
+        </div>
+        {% endif %}
+        
+        {% if enrollment.source %}
+        <div class="info-row">
+            <span class="label">Источник записи:</span>
+            <span>{{ enrollment.source }}</span>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+<!-- Платежи -->
+<div class="glass-card" style="margin-top: var(--space-lg);">
+    <h2>💳 Платежи</h2>
+    
+    {% if payments %}
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Дата</th>
+                <th>Сумма</th>
+                <th>Статус</th>
+                <th>Способ</th>
+                <th>Комментарий</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for payment in payments %}
+            <tr>
+                <td>{{ payment.created_at|date:"d.m.Y H:i" }}</td>
+                <td><strong>{{ payment.amount }} ₽</strong></td>
+                <td><span class="badge badge-{{ payment.status|lower }}">{{ payment.get_status_display }}</span></td>
+                <td>{{ payment.get_payment_method_display }}</td>
+                <td>{{ payment.comment|default:"-" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="text-muted">Платежей нет</p>
+    {% endif %}
+</div>
+
+<style>
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: var(--space-lg);
+    }
+    
+    .page-actions {
+        display: flex;
+        gap: var(--space-sm);
+    }
+    
+    .grid-2 {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--space-lg);
+        margin-bottom: var(--space-lg);
+    }
+    
+    .glass-card {
+        padding: var(--space-lg);
+        border-radius: var(--radius-lg);
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+    }
+    
+    .glass-card h2 {
+        margin-bottom: var(--space-md);
+        font-size: 18px;
+        color: var(--text-primary);
+        border-bottom: 1px solid var(--glass-border);
+        padding-bottom: var(--space-sm);
+    }
+    
+    .info-table {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-sm);
+    }
+    
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        border-bottom: 1px solid var(--glass-border);
+    }
+    
+    .info-row:last-child {
+        border-bottom: none;
+    }
+    
+    .info-row .label {
+        color: var(--text-muted);
+        font-size: 14px;
+    }
+    
+    .info-row span:last-child {
+        font-weight: 500;
+        text-align: right;
+    }
+    
+    .badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 500;
+    }
+    
+    .badge-pending { background: #fff3cd; color: #856404; }
+    .badge-active { background: #d4edda; color: #155724; }
+    .badge-completed { background: #cce5ff; color: #004085; }
+    .badge-dropped { background: #f8d7da; color: #721c24; }
+    .badge-paused { background: #e2e3e5; color: #383d41; }
+    
+    .badge-paid { background: #d4edda; color: #155724; }
+    .badge-not_paid { background: #f8d7da; color: #721c24; }
+    .badge-partial { background: #fff3cd; color: #856404; }
+    
+    .progress-bar {
+        height: 8px;
+        background: var(--bg-surface);
+        border-radius: 4px;
+        overflow: hidden;
+        margin-top: 8px;
+    }
+    
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--primary), var(--accent));
+        transition: width 0.3s ease;
+    }
+    
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .data-table th,
+    .data-table td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid var(--glass-border);
+    }
+    
+    .data-table th {
+        background: var(--bg-surface);
+        font-weight: 600;
+        color: var(--text-muted);
+        font-size: 13px;
+        text-transform: uppercase;
+    }
+    
+    .text-success { color: #10b981; }
+    .text-muted { color: var(--text-muted); }
+    
+    @media (max-width: 768px) {
+        .grid-2 {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}

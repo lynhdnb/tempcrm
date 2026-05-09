@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Оплатить платёж — MUSERP{% endblock %}
+
+{% block content %}
+
+<div class="glass-card" style="max-width: 500px; margin: 0 auto; text-align: center; padding: var(--space-lg);">
+    <div style="font-size: 64px; margin-bottom: var(--space-md);">💰</div>
+    
+    <h2 style="margin-bottom: var(--space-sm);">Отметить платёж как оплаченный</h2>
+    
+    <div style="margin: var(--space-md) 0;">
+        <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 8px;">Клиент</p>
+        <p style="font-size: 18px; font-weight: 600;">{{ payment.client.last_name }} {{ payment.client.first_name }}</p>
+    </div>
+    
+    <div style="margin: var(--space-md) 0;">
+        <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 8px;">Сумма</p>
+        <p style="font-size: 32px; font-weight: 700; color: var(--primary);">{{ payment.amount|floatformat:2 }} ₽</p>
+    </div>
+    
+    <div style="margin: var(--space-md) 0;">
+        <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 8px;">Номер счёта</p>
+        <p style="font-size: 16px; font-weight: 500;">{{ payment.invoice_number|default:"Не указан" }}</p>
+    </div>
+    
+    <p style="font-size: 12px; color: var(--text-muted); margin-bottom: var(--space-lg);">
+        Статус будет изменён на "Оплачено", а текущая дата и время будут записаны
+    </p>
+    
+    <form method="post" style="display: flex; gap: var(--space-sm); justify-content: center;">
+        {% csrf_token %}
+        
+        <a href="{% url 'core:payment_detail' payment.pk %}" class="btn-secondary">
+            Отмена
+        </a>
+        
+        <button type="submit" class="btn-primary">
+            <span class="material-symbols-outlined">check</span>
+            Подтвердить оплату
+        </button>
+    </form>
+</div>
+
+{% endblock %}

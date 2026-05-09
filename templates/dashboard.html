@@ -1,0 +1,214 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Дашборд — MUSERP{% endblock %}
+
+{% block content %}
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+        <div>
+            <h1>🔷 Дашборд владельца</h1>
+            <p>Обзор ключевых метрик школы • {{ timezone.now|date:"F Y" }}</p>
+        </div>
+        <div class="page-actions">
+            <button class="btn-secondary">
+                <span class="material-symbols-outlined">download</span>
+                Экспорт
+            </button>
+            <button class="btn-secondary">
+                <span class="material-symbols-outlined">tune</span>
+                Фильтры
+            </button>
+        </div>
+    </div>
+
+    <!-- KPI CARDS -->
+    <div class="kpi-grid">
+        <!-- Выручка -->
+        <div class="glass-card kpi-card">
+            <span class="material-symbols-outlined icon-bg">payments</span>
+            <div class="kpi-label">Выручка за месяц</div>
+            <div class="kpi-value">₽ {{ month_payments|floatformat:0|default:0|add:"0" }}</div>
+            <div class="kpi-delta positive">
+                <span class="material-symbols-outlined" style="font-size:14px">trending_up</span>
+                Сегодня: {{ today_payments }}
+            </div>
+            <div class="kpi-progress">
+                <div class="kpi-progress-bar" style="width: 78%"></div>
+            </div>
+        </div>
+
+        <!-- Активные клиенты -->
+        <div class="glass-card kpi-card">
+            <span class="material-symbols-outlined icon-bg">people</span>
+            <div class="kpi-label">Активные клиенты</div>
+            <div class="kpi-value">{{ total_clients|default:0 }}</div>
+            <div class="kpi-delta positive">
+                <span class="material-symbols-outlined" style="font-size:14px">person_add</span>
+                Молчуны: {{ silent_clients|default:0 }}
+            </div>
+            <div class="kpi-progress">
+                <div class="kpi-progress-bar" style="width: {{ active_clients|default:0 }}%"></div>
+            </div>
+        </div>
+
+        <!-- Просроченные платежи -->
+        <div class="glass-card kpi-card">
+            <span class="material-symbols-outlined icon-bg">warning</span>
+            <div class="kpi-label">Просроченные платежи</div>
+            <div class="kpi-value" style="color: var(--error)">₽ {{ overdue_invoices|default:0 }}</div>
+            <div class="kpi-delta negative">
+                <span class="material-symbols-outlined" style="font-size:14px">trending_down</span>
+                Требуют внимания
+            </div>
+            <div class="kpi-progress">
+                <div class="kpi-progress-bar" style="width: 15%; background: linear-gradient(90deg, var(--error), #c00);"></div>
+            </div>
+        </div>
+
+        <!-- Задачи -->
+        <div class="glass-card kpi-card">
+            <span class="material-symbols-outlined icon-bg">task_alt</span>
+            <div class="kpi-label">Задачи</div>
+            <div class="kpi-value">{{ my_tasks|default:0 }}</div>
+            <div class="kpi-delta negative">
+                <span class="material-symbols-outlined" style="font-size:14px">error</span>
+                Просрочено: {{ overdue_tasks|default:0 }}
+            </div>
+            <div class="kpi-progress">
+                <div class="kpi-progress-bar" style="width: 65%"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- BENTO GRID -->
+    <div class="bento-grid">
+        <!-- Последние платежи -->
+        <div class="glass-card bento-item wide">
+            <div class="section-header">
+                <h3>💳 Последние платежи</h3>
+                <a href="#">Все →</a>
+            </div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Клиент</th>
+                        <th>Сумма</th>
+                        <th>Статус</th>
+                        <th>Дата</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for payment in recent_payments|default:"" %}
+                    <tr>
+                        <td>{{ payment.client.last_name }} {{ payment.client.first_name|slice:":1" }}.</td>
+                        <td>₽ {{ payment.amount }}</td>
+                        <td>
+                            {% if payment.status == 'COMPLETED' %}
+                                <span class="status-badge status-paid">✓ Оплачено</span>
+                            {% elif payment.status == 'PENDING' %}
+                                <span class="status-badge status-pending">⏳ Ожидает</span>
+                            {% else %}
+                                <span class="status-badge status-overdue">⚠ Просрочено</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ payment.created_at|date:"d.m.Y" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" style="text-align:center; color:var(--text-muted)">Платежи отсутствуют</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Предупреждения -->
+        <div class="glass-card bento-item narrow">
+            <div class="section-header">
+                <h3>⚠ Требуют внимания</h3>
+                <a href="#">Все (7) →</a>
+            </div>
+            <div class="alerts-list">
+                <div class="alert-item critical">
+                    <span class="material-symbols-outlined">error</span>
+                    <div class="alert-content">
+                        <h4>Просрочен платёж</h4>
+                        <p>Клиент не оплатил взнос (просрочка 5 дней)</p>
+                        <span class="alert-time">2 часа назад</span>
+                    </div>
+                </div>
+                <div class="alert-item">
+                    <span class="material-symbols-outlined">person_off</span>
+                    <div class="alert-content">
+                        <h4>Студент не был 14+ дней</h4>
+                        <p>Анна Л. не посещала занятия</p>
+                        <span class="alert-time">Вчера</span>
+                    </div>
+                </div>
+                <div class="alert-item">
+                    <span class="material-symbols-outlined">event_busy</span>
+                    <div class="alert-content">
+                        <h4>Свободные слоты</h4>
+                        <p>Кабинет 2 свободен 3 вечера</p>
+                        <span class="alert-time">3 дня назад</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Недавние взаимодействия -->
+        <div class="glass-card bento-item full">
+            <div class="section-header">
+                <h3>📋 Недавние взаимодействия</h3>
+                <a href="#">Все →</a>
+            </div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Дата</th>
+                        <th>Клиент</th>
+                        <th>Тип</th>
+                        <th>Статус</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for interaction in recent_interactions %}
+                    <tr>
+                        <td>{{ interaction.date_time|date:"d.m.Y H:i" }}</td>
+                        <td>{{ interaction.client.last_name }} {{ interaction.client.first_name|slice:":1" }}.</td>
+                        <td>{{ interaction.interaction_type.name }}</td>
+                        <td>{{ interaction.get_status_display }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" style="text-align:center; color:var(--text-muted)">Взаимодействия отсутствуют</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="footer glass-card">
+        MUSERP CRM v2.0 • Данные обновлены: сегодня в {{ timezone.now|date:"H:i" }} • 
+        <a href="#" style="color:var(--primary);text-decoration:none">Политика конфиденциальности</a>
+    </footer>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Анимация KPI progress bars
+    document.querySelectorAll('.kpi-progress-bar').forEach(bar => {
+        const width = bar.style.width;
+        bar.style.width = '0';
+        setTimeout(() => {
+            bar.style.transition = 'width 1s ease-out';
+            bar.style.width = width;
+        }, 200);
+    });
+});
+</script>
+{% endblock %}

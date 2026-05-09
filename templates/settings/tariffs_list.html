@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block title %}Тарифы - MUSERP{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>
+            <span class="material-symbols-outlined">price_check</span>
+            Тарифы
+        </h1>
+        <p>Управление тарифными планами и ценой занятий</p>
+    </div>
+    <a href="{% url 'core:tariff_create' %}" class="btn-primary">
+        <span class="material-symbols-outlined">add</span>
+        Добавить тариф
+    </a>
+</div>
+
+<!-- Фильтры -->
+<div class="filter-bar">
+    <form method="get" class="filter-form">
+        <select name="category" onchange="this.form.submit()">
+            <option value="">Все категории</option>
+            {% for value, label in categories %}
+            <option value="{{ value }}" {% if current_category == value %}selected{% endif %}>
+                {{ label }}
+            </option>
+            {% endfor %}
+        </select>
+    </form>
+</div>
+
+<!-- Список тарифов -->
+<div class="tariffs-grid">
+    {% for tariff in tariffs %}
+    <div class="tariff-card {% if not tariff.is_active %}inactive{% endif %}">
+        <div class="tariff-header">
+            <div class="tariff-category">
+                {% if tariff.category == 'individual' %}
+                <span class="material-symbols-outlined">person</span>
+                Индивидуальный
+                {% elif tariff.category == 'group' %}
+                <span class="material-symbols-outlined">groups</span>
+                Групповой
+                {% elif tariff.category == 'unlimited' %}
+                <span class="material-symbols-outlined">infinity</span>
+                Безлимит
+                {% endif %}
+            </div>
+            {% if tariff.is_active %}
+            <span class="badge badge-success">Активен</span>
+            {% else %}
+            <span class="badge badge-secondary">Отключён</span>
+            {% endif %}
+        </div>
+
+        <div class="tariff-price">
+            {% if tariff.category == 'unlimited' %}
+            {{ tariff.price }} ₽<small>/месяц</small>
+            {% elif tariff.lesson_count %}
+            {{ tariff.price }} ₽<small>за {{ tariff.lesson_count }} занятий</small>
+            {% else %}
+            {{ tariff.price }} ₽<small>/занятие</small>
+            {% endif %}
+        </div>
+
+        {% if tariff.lesson_count %}
+        <div class="tariff-details">
+            <div class="detail-item">
+                <span class="material-symbols-outlined">event_repeat</span>
+                <span>{{ tariff.lesson_count }} занятий</span>
+            </div>
+            <div class="detail-item">
+                <span class="material-symbols-outlined">schedule</span>
+                <span>Действителен {{ tariff.duration_days }} дней</span>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if tariff.discount_percent > 0 %}
+        <div class="tariff-discount">
+            Скидка {{ tariff.discount_percent }}%
+        </div>
+        {% endif %}
+
+        <p class="tariff-description">{{ tariff.description|default:"Нет описания" }}</p>
+
+        <div class="tariff-actions">
+            <a href="{% url 'core:tariff_update' tariff.id %}" class="btn-secondary">
+                <span class="material-symbols-outlined">edit</span>
+                Редактировать
+            </a>
+            <a href="{% url 'core:tariff_delete' tariff.id %}" class="btn-danger">
+                <span class="material-symbols-outlined">delete</span>
+                {% if tariff.is_active %}Отключить{% else %}Включить{% endif %}
+            </a>
+        </div>
+    </div>
+    {% empty %}
+    <div class="empty-state">
+        <span class="material-symbols-outlined">inventory_2</span>
+        <h3>Тарифы не созданы</h3>
+        <p>Добавьте первый тариф, чтобы начать работу</p>
+        <a href="{% url 'core:tariff_create' %}" class="btn-primary">
+            <span class="material-symbols-outlined">add</span>
+            Создать тариф
+        </a>
+    </div>
+    {% endfor %}
+</div>
+
+<div class="info-box">
+    <h4>💡 Как работают тарифы</h4>
+    <ol>
+        <li><strong>Individual</strong> - разовые занятия или пакеты уроков</li>
+        <li><strong>Group</strong> - групповые занятия с несколькими студентами</li>
+        <li><strong>Unlimited</strong> - безлимитные абонементы на месяц</li>
+    </ol>
+    <p>
+        При зачислении клиента на курс система автоматически подставит цену из выбранного тарифа.
+    </p>
+</div>
+{% endblock %}
