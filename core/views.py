@@ -7,7 +7,7 @@ from django.utils import timezone
 from datetime import timedelta, date, datetime
 from decimal import Decimal
 
-from .models import Client, RoleAssignment, EmployeeProfile, Course, CourseCategory, Enrollment, ClientComment, Tariff
+from .models import Client, RoleAssignment, EmployeeProfile, Course, CourseCategory, Enrollment
 from interactions.models import Interaction, Notification
 from lessons.models import Lesson
 from payments.models import Payment, Invoice, PaymentMethod
