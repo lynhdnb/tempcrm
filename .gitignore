@@ -70,3 +70,6 @@ coverage.xml
 
 # Empty DJ_CRM_v2 folder marker (can be deleted)
 DJ_CRM_v2/.gitkeep
+
+# Remove empty DJ_CRM_v2 folder
+DJ_CRM_v2/
